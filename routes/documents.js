@@ -3,7 +3,6 @@ var router = express.Router();
 //import connection data base
 require('../models/connection');
 const User = require('../models/users');
-const ModifiedPattern = require("../models/modifiedPattern");
 const Document = require("../models/document");
 //import module checkbody
 const { checkbody } = require('../modules/checkbody');

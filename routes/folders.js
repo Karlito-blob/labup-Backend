@@ -3,6 +3,7 @@ var router = express.Router();
 //import connection data base
 require('../models/connection');
 //import Models database
+const User = require('../models/users');
 const Folder = require("../models/folder")
 //import module checkbody
 const { checkbody } = require('../modules/checkbody');
@@ -15,14 +16,16 @@ router.get('/:token', (req, res) => {
         } else {
             Folder.find({}).then(data => {
                 if (data == []) {
-                    res.json({result: false, message: "user don't have modified patterns"})
+                    res.json({result: false, message: "user don't have folders"})
                 } else {
-                    res.json({result : true, ModifiedPatterns : data})
+                    res.json({result : true, Folders : data})
                 }
             })
         }
     })
 });
+
+
 
 
 
