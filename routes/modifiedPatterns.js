@@ -1,10 +1,14 @@
 var express = require('express');
 var router = express.Router();
+//import connection data base
 require('../models/connection');
+//import Models database
 const User = require('../models/users');
 const InitialPattern = require('../models/initialPattern');
 const ModifiedPattern = require("../models/modifiedPattern");
+//import module checkbody
 const { checkbody } = require('../modules/checkbody');
+//dependances pour upload cloudinary
 const uniqid = require('uniqid');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
