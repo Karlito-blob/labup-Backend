@@ -69,44 +69,35 @@ router.put('/update', async (req, res) => {
   
   try {
     // Vérifiez que le corps de la requête a bien les champs nécessaires
-    if (!checkbody(req.body, ['userName', 'password', 'token'])) {
+    if (!checkbody(req.body, ['userName', 'password', 'avatar', 'email'])) {
       res.json({ result: false, error: 'Champ vide ou manquant' });
       return;
     }
 
-    // Vérifiez si l'utilisateur existe
-    const existingUser = await User.findOne({ token: req.body.token });
+    // Créez un objet de mise à jour avec les champs à mettre à jour
+    const updateFields = {
+      userName: req.body.userName,
+      password: bcrypt.hashSync(req.body.password, 10),
+      avatar: req.body.avatar,
+      email: req.body.email,
+    };
 
-    if (!existingUser) {
-      res.json({ result: false, error: 'Utilisateur non trouvé' });
-      return;
-    }
+    // Utilisez updateOne() pour mettre à jour les champs spécifiés
+    const result = await userSchema.updateOne({ token: req.body.token }, updateFields);
 
-    // Mettez à jour les paramètres sauf le token
-    const hashedPassword = bcrypt.hashSync(req.body.password, 10);
-    const updateResult = await User.updateOne(
-      { token: req.body.token },
-      {
-        $set: {
-          userName: req.body.userName,
-          password: hashedPassword,
-          avatar: req.body.avatar,
-          email: req.body.email,
-        },
-      }
-    );
+    // Ajoutez des logs pour le débogage
+    console.log(result);
 
-    if (updateResult.nModified > 0) {
-      // Au moins un document a été modifié
-      res.json({ result: true, message: 'Utilisateur mis à jour avec succès' });
+    // Vérifiez si la mise à jour a réussi (au moins un document a été filtré)
+    if (result.n > 0 && result.ok === 1) {
+      res.json({ result: true, user: updateFields });
     } else {
-      // Aucun document n'a été modifié
-      res.json({ result: false, error: 'Aucune modification effectuée' });
+      res.json({ result: false, error: 'Aucun utilisateur mis à jour' });
     }
   } catch (error) {
+    console.error(error);
     res.json({ result: false, error: 'Une erreur est survenue lors de la mise à jour des paramètres' });
   }
-
 });
  
 
