@@ -34,7 +34,7 @@ router.post('/signup', (req, res) => {
     });
 
       newUser.save().then(newDoc => {
-        res.json({ result: true, token: newDoc.token });
+        res.json({ result: true, token: newDoc.token, userName: newDoc.userName });
       });
     } else {
       // User déjà existant dans la database
@@ -56,21 +56,59 @@ router.post('/signin', (req, res) => {
 
   User.findOne({ userName: req.body.userName }).then(data => {
     if (data && bcrypt.compareSync(req.body.password, data.password)) {
-      res.json({ result: true, token: data.token });
+      res.json({ result: true, token: data.token, userName: data.userName });
     } else {
       res.json({ result: false, error: 'Utilisateur non trouvé ou mot de passe erroné' });
     }
   });
 });
 
-//--> Route Put Modifier les paramètres
+//--> Route Put Modifier / Mettre à jour les paramètres (username, password, avatar, email)
 
-router.put('/update', (req, res) => {
+router.put('/update', async (req, res) => {
   
- 
-  res.json({ result: true });
- });
+  try {
+    // Vérifiez que le corps de la requête a bien les champs nécessaires
+    if (!checkbody(req.body, ['userName', 'password', 'token'])) {
+      res.json({ result: false, error: 'Champ vide ou manquant' });
+      return;
+    }
 
+    // Vérifiez si l'utilisateur existe
+    const existingUser = await User.findOne({ token: req.body.token });
+
+    if (!existingUser) {
+      res.json({ result: false, error: 'Utilisateur non trouvé' });
+      return;
+    }
+
+    // Mettez à jour les paramètres sauf le token
+    const hashedPassword = bcrypt.hashSync(req.body.password, 10);
+    const updateResult = await User.updateOne(
+      { token: req.body.token },
+      {
+        $set: {
+          userName: req.body.userName,
+          password: hashedPassword,
+          avatar: req.body.avatar,
+          email: req.body.email,
+        },
+      }
+    );
+
+    if (updateResult.nModified > 0) {
+      // Au moins un document a été modifié
+      res.json({ result: true, message: 'Utilisateur mis à jour avec succès' });
+    } else {
+      // Aucun document n'a été modifié
+      res.json({ result: false, error: 'Aucune modification effectuée' });
+    }
+  } catch (error) {
+    res.json({ result: false, error: 'Une erreur est survenue lors de la mise à jour des paramètres' });
+  }
+
+});
+ 
 
 module.exports = router;
 
