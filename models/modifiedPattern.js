@@ -4,7 +4,6 @@ const modifiedPatternSchema = mongoose.Schema({
     idUser: { type: mongoose.Schema.Types.ObjectId, ref: "users" }, 
     idPattern: { type: mongoose.Schema.Types.ObjectId, ref: "initalPatterns" },
     patternName: String,
-    patternMiniature: String, // URL cloudinary)
     paramsModif: [{
         paramName: String,
         type: String,
@@ -13,12 +12,10 @@ const modifiedPatternSchema = mongoose.Schema({
         valeurMin: Number,
         valeurMax: Number,
     }],
-
     fileName: String,
     creationDate: Date,
     modificationDate: Date,
-    URL_Cloudinary: String,
-
+    patternMiniature: String, // URL cloudinary)
 });
 
 const ModifiedPattern = mongoose.model(' modifiedPatterns', modifiedPatternSchema);
