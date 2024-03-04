@@ -2,9 +2,9 @@ var express = require('express');
 var router = express.Router();
 //import connection data base
 require('../models/connection');
-//import Models database
 const User = require('../models/users');
 const ModifiedPattern = require("../models/modifiedPattern");
+const Document = require("../models/document");
 //import module checkbody
 const { checkbody } = require('../modules/checkbody');
 //dependances pour upload cloudinary
@@ -12,18 +12,17 @@ const uniqid = require('uniqid');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 
-
-//route pour récuperer tous les patterns d'un user en fonction de son token (et dans un premier temps, à trier coté front pour récupérer UN pattern modif, j'effacerai ce bout de commmentaire quand la route dédiée sera prête)
+//route pour récuperer tous les documents d'un user en fonction de son token (et dans un premier temps, à trier coté front pour récupérer UN document précis, j'effacerai ce bout de commmentaire quand la route dédiée sera prête)
 router.get('/:token', (req, res) => {
     User.findOne({token: req.params.token}).then(data => {
         if(!data) {
             res.json({result: false, message: "user token not found"})
         } else {
-            ModifiedPattern.find({}).then(data => {
+            Document.find({}).then(data => {
                 if (data == []) {
-                    res.json({result: false, message: "user don't have modified patterns"})
+                    res.json({result: false, message: "user don't have  documents"})
                 } else {
-                    res.json({result : true, ModifiedPatterns : data})
+                    res.json({result : true, Documents : data})
                 }
             })
         }
@@ -35,7 +34,7 @@ router.post('/', async (req, res) => {
     const photoPath = `./tmp/${uniqid()}.jpg`;
     const resultMove = await req.files.photoFromFront.mv(photoPath);
     
-    if (!checkbody(req.body, ['token','idPattern','patternName', 'paramsModif', "fileName"])) {
+    if (!checkbody(req.body, ['token','fileName','fileType', 'documentContent'])) {
         res.json({ result: false, error: 'Missing or empty fields' });
         return;
       }
@@ -46,17 +45,16 @@ router.post('/', async (req, res) => {
         fs.unlinkSync(photoPath);
 
         User.findOne({token: req.body.token}).then(data => {
-            const newModifiedPattern = new ModifiedPattern({
+            const newDocument = new Document({
                 idUser: data._id,
-                idPattern: req.body.idPattern,
-                patternName: req.body.patternName,
-                paramsModif: req.body.paramsModif,
                 fileName: req.body.fileName,
+                fileType: req.body.fileType,
                 creationDate: new Date(),
                 modificationDate: new Date(),
-                patternMiniature: resultCloudinary.secure_url,
+                documentContent: req.body.documentContent,
+                documentMiniature: resultCloudinary.secure_url,
             })
-            newModifiedPattern.save().then(newDoc => {
+            newDocument.save().then(newDoc => {
                 res.json({result: true, newDoc})
             })
         })    
@@ -65,12 +63,12 @@ router.post('/', async (req, res) => {
     }
 })
 
-//route pour update un pattern (il reste toujours dans son statut de "modifiedPattern"), pour le moment sans token car je nen vois pas l'utilité vu que chaque _id de pattern modif est unique sur Mongo...
+//route pour update un pattern (il reste toujours dans son statut de "document"), pour le moment sans token car je nen vois pas l'utilité vu que chaque _id de document est unique sur Mongo...
 router.put("/", async (req, res) => {
     const photoPath = `./tmp/${uniqid()}.jpg`;
     const resultMove = await req.files.photoFromFront.mv(photoPath);
     
-    if (!checkbody(req.body, ['paramsModif', "fileName", "id"])) {
+    if (!checkbody(req.body, ['fileName', 'fileType', 'documentContent', 'id'])) {
         res.json({ result: false, error: 'Missing or empty fields' });
         return;
       }
@@ -80,13 +78,14 @@ router.put("/", async (req, res) => {
 
         fs.unlinkSync(photoPath);
 
-        ModifiedPattern.findOneAndUpdate({_id: req.body.id}, [
-            {paramsModif: req.body.paramsModif},
+        Document.findOneAndUpdate({_id: req.body.id}, [
             {fileName: req.body.fileName},
+            {fileType: req.body.fileType},
             {modificationDate: new Date()},
+            {documentContent: req.body.documentContent},
             {patternMiniature: resultCloudinary.secure_url}
         ]).then(() => {
-            ModifiedPattern.findOne({_id: req.body.id}).then(modifDoc => {
+            Document.findOne({_id: req.body.id}).then(modifDoc => {
                 res.json({result: true, modifDoc})
             })
         })
@@ -100,15 +99,15 @@ router.delete("/", (req, res) => {
         res.json({ result: false, error: 'Missing or empty fields' });
         return;
       }
-    ModifiedPattern.findOne({_id: req.body.id}).then(data => {
+    Document.findOne({_id: req.body.id}).then(data => {
         if(data) {
-            ModifiedPattern.deleteOne({_id: data._id}).then(() => {
-            res.json({result: true, message: "modifiedPattern delete"})
+            Document.deleteOne({_id: data._id}).then(() => {
+            res.json({result: true, message: "document delete"})
             })
         } else {
-            res.json({result: false, message: "modifiedPattern not found"})
+            res.json({result: false, message: "document not found"})
         }
     })
 })
 
-module.exports = router;
+module.exports = app;
