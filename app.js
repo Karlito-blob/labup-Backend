@@ -9,9 +9,9 @@ const mongoose = require('mongoose');
 
 require('./models/connection');
 
-
-var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var initialPatternsRouter = require('./routes/initialPatterns')
+var modifiedPatternsRouter = require('./routes/initialPatterns')
 
 var app = express();
 
@@ -24,7 +24,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/initialPatterns', initialPatternsRouter)
+app.use('modifiedPatterns', modifiedPatternsRouter)
 
 module.exports = app;
