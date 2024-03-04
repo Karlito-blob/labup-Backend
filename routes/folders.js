@@ -7,7 +7,6 @@ const User = require('../models/users');
 const Folder = require("../models/folder")
 //import module checkbody
 const { checkbody } = require('../modules/checkbody');
-const Folder = require('../models/folder');
 
 router.get('/:token', (req, res) => {
     User.findOne({token: req.params.token}).then(data => {
@@ -29,4 +28,4 @@ router.get('/:token', (req, res) => {
 
 
 
-module.exports = app;
+module.exports = router;

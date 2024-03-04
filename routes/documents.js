@@ -109,4 +109,4 @@ router.delete("/", (req, res) => {
     })
 })
 
-module.exports = app;
+module.exports = router;
