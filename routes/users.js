@@ -68,47 +68,49 @@ router.post('/signin', (req, res) => {
 router.put('/update', async (req, res) => {
   
   try {
-    // Vérifiez que le corps de la requête a bien les champs nécessaires
-    if (!checkbody(req.body, ['userName', 'password', 'token'])) {
-      res.json({ result: false, error: 'Champ vide ou manquant' });
-      return;
-    }
+    let updateFields = {};
 
-    // Vérifiez si l'utilisateur existe
-    const existingUser = await User.findOne({ token: req.body.token });
-
-    if (!existingUser) {
-      res.json({ result: false, error: 'Utilisateur non trouvé' });
-      return;
-    }
-
-    // Mettez à jour les paramètres sauf le token
-    const hashedPassword = bcrypt.hashSync(req.body.password, 10);
-    const updateResult = await User.updateOne(
-      { token: req.body.token },
-      {
-        $set: {
-          userName: req.body.userName,
-          password: hashedPassword,
-          avatar: req.body.avatar,
-          email: req.body.email,
-        },
+    for (const key in req.body) {
+      if (key === "password") {
+        updateFields[key] = bcrypt.hashSync(req.body[key], 10) 
+      } else {
+        updateFields[key] = req.body[key]
       }
-    );
+    }
 
-    if (updateResult.nModified > 0) {
-      // Au moins un document a été modifié
-      res.json({ result: true, message: 'Utilisateur mis à jour avec succès' });
+    // Utilisez updateOne() pour mettre à jour les champs spécifiés
+    const result = await User.updateOne({ token: req.body.token }, updateFields);
+
+    // Ajoutez des logs pour le débogage
+    console.log(result);
+
+    // Vérifiez si la mise à jour a réussi (au moins un document a été filtré)
+    if (result.modifiedCount > 0) {
+      res.json({ result: true, user: updateFields });
     } else {
-      // Aucun document n'a été modifié
-      res.json({ result: false, error: 'Aucune modification effectuée' });
+      res.json({ result: false, error: 'Aucun utilisateur mis à jour' });
     }
   } catch (error) {
+    console.error(error);
     res.json({ result: false, error: 'Une erreur est survenue lors de la mise à jour des paramètres' });
   }
-
 });
  
+
+//--> Route delete un compte
+
+router.delete("/delete", (req, res) => {
+  User.findOne({ token: req.body.token }).then(data => {
+      if(data) {
+          User.deleteOne({ token: req.body.token }).then(() => {
+          res.json({result: true, message: "utilisateur supprimé"})
+          })
+      } else {
+          res.json({result: false, message: "utilisateur introuvable"})
+      }
+  })
+})
+
 
 module.exports = router;
 
