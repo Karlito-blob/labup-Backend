@@ -19,8 +19,8 @@ router.get('/:token', (req, res) => {
             res.json({result: false, message: "user token not found"})
         } else {
             ModifiedPattern.find({user: userData._id}).populate('initialPattern').then(data => {
-                if (data == []) {
-                    res.json({result: false, message: "user don't have modified patterns"})
+                if (data.length === 0) {
+                    res.json({result: false, message: "user don't have any modified patterns"})
                 } else {
                     res.json({result : true, ModifiedPatterns : data})
                 }
@@ -35,7 +35,7 @@ router.get("/:token/:id", (req, res) => {
         if(!userData) {
             res.json({result: false, message: "user token not found"})
         } else {
-            ModifiedPattern.findOne({and:[{user: userData._id}, {_id: req.params.id}]}).populate('initialPattern').then(data => {
+            ModifiedPattern.findOne({user: userData._id, _id: req.params.id}).populate('initialPattern').then(data => {
                 if (!data) {
                     res.json({result: false, message: "can't find this pattern"})
                 } else {
@@ -103,12 +103,11 @@ router.put("/", async (req, res) => {
 
             fs.unlinkSync(photoPath);
     
-            const modifDoc = await ModifiedPattern.findOneAndUpdate({_id: req.body.id}, [
-                {paramsModif: req.body.paramsModif},
-                {fileName: req.body.fileName},
-                {modificationDate: new Date()},
-                {patternMiniature: resultCloudinary.secure_url}
-            ])
+            const modifDoc = await ModifiedPattern.findOneAndUpdate({_id: req.body.id}, 
+                {paramsModif: req.body.paramsModif,
+                fileName: req.body.fileName,
+                modificationDate: new Date(),
+                patternMiniature: resultCloudinary.secure_url})
             res.json({result: true, modifDoc})
         } catch (error) {
             res.json({ result: false, error: error.message });
@@ -119,12 +118,8 @@ router.put("/", async (req, res) => {
 })
 
 //route delete UN modifiedpattern de la collection modifiedPatterns
-router.delete("/", (req, res) => {
-    if (!checkbody(req.body.id)) {
-        res.json({ result: false, error: 'Missing or empty fields' });
-        return;
-      }
-    ModifiedPattern.findOne({_id: req.body.id}).then(data => {
+router.delete("/:id", (req, res) => {
+    ModifiedPattern.findOne({_id: req.params.id}).then(data => {
         if(data) {
             ModifiedPattern.deleteOne({_id: data._id}).then(() => {
             res.json({result: true, message: "modifiedPattern delete"})

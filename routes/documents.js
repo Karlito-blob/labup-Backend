@@ -11,15 +11,15 @@ const uniqid = require('uniqid');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 
-//route pour récuperer tous les documents d'un user en fonction de son token
+//route pour récuperer tous les documents d'un user en fonction de son token (IL FAUDRA PEUT ETRE SUPPRIMER LE POPULATE LIGNE 20 PAS SUR QUIL SOIT UTILE POUR UN SOUS-DOCUMENT)
 router.get('/:token', (req, res) => {
     User.findOne({token: req.params.token}).then(userData => {
         if(!userData) {
             res.json({result: false, message: "user token not found"})
         } else {
             Document.find({user: userData._id}).populate('documentContent').then(data => {
-                if (data == []) {
-                    res.json({result: false, message: "user don't have  documents"})
+                if (data.length === 0) {
+                    res.json({result: false, message: "user don't have any documents"})
                 } else {
                     res.json({result : true, Documents : data})
                 }
@@ -34,7 +34,7 @@ router.get("/:token/:id", (req, res) => {
         if(!userData) {
             res.json({result: false, message: "user token not found"})
         } else {
-            Document.findOne({and:[{user: userData._id}, {_id: req.params.id}]}).populate('documentContent').then(data => {
+            Document.findOne({user: userData._id, _id: req.params.id}).populate('documentContent').then(data => {
                 if (!data) {
                     res.json({result: false, message: "can't find this document"})
                 } else {
@@ -101,13 +101,12 @@ router.put("/", async (req, res) => {
 
             fs.unlinkSync(photoPath);
     
-            const modifDoc = await Document.findOneAndUpdate({_id: req.body.id}, [
-                {fileName: req.body.fileName},
-                {fileType: req.body.fileType},
-                {modificationDate: new Date()},
-                {documentContent: req.body.documentContent},
-                {documentMiniature: resultCloudinary.secure_url}
-            ])
+            const modifDoc = await Document.findOneAndUpdate({_id: req.body.id},
+                {fileName: req.body.fileName,
+                fileType: req.body.fileType,
+                modificationDate: new Date(),
+                documentContent: req.body.documentContent,
+                documentMiniature: resultCloudinary.secure_url})
             res.json({result: true, modifDoc})
         } catch (error) {
             res.json({ result: false, error: error.message });
@@ -118,12 +117,8 @@ router.put("/", async (req, res) => {
 })
 
 //route delete UN document de la collection documents
-router.delete("/", (req, res) => {
-    if (!checkbody(req.body.id)) {
-        res.json({ result: false, error: 'Missing or empty fields' });
-        return;
-      }
-    Document.findOne({_id: req.body.id}).then(data => {
+router.delete("/:id", (req, res) => {
+    Document.findOne({_id: req.params.id}).then(data => {
         if(data) {
             Document.deleteOne({_id: data._id}).then(() => {
             res.json({result: true, message: "document delete"})
