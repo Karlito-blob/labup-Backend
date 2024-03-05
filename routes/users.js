@@ -14,7 +14,7 @@ const bcrypt = require('bcrypt');
 
 router.post('/signup', (req, res) => {
 
-  if (!checkbody(req.body, ['userName', 'password'])) {
+  if (!checkbody(req.body, ['userName', 'password', "email"])) {
     res.json({ result: false, error: 'Champ vide ou manquant' });
     return;
   }
@@ -65,7 +65,7 @@ router.post('/signin', (req, res) => {
 
 //--> Route Put Modifier / Mettre à jour les paramètres (username, password, avatar, email)
 
-router.put('/update', async (req, res) => {
+router.put('/', async (req, res) => {
   
   try {
     let updateFields = {};
@@ -99,7 +99,7 @@ router.put('/update', async (req, res) => {
 
 //--> Route delete un compte
 
-router.delete("/delete", (req, res) => {
+router.delete("/", (req, res) => {
   User.findOne({ token: req.body.token }).then(data => {
       if(data) {
           User.deleteOne({ token: req.body.token }).then(() => {

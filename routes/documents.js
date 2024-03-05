@@ -11,13 +11,13 @@ const uniqid = require('uniqid');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 
-//route pour récuperer tous les documents d'un user en fonction de son token (et dans un premier temps, à trier coté front pour récupérer UN document précis, j'effacerai ce bout de commmentaire quand la route dédiée sera prête)
+//route pour récuperer tous les documents d'un user en fonction de son token
 router.get('/:token', (req, res) => {
     User.findOne({token: req.params.token}).then(userData => {
         if(!userData) {
             res.json({result: false, message: "user token not found"})
         } else {
-            Document.find({user: userData._id}).then(data => {
+            Document.find({user: userData._id}).populate('documentContent').then(data => {
                 if (data == []) {
                     res.json({result: false, message: "user don't have  documents"})
                 } else {
@@ -28,7 +28,24 @@ router.get('/:token', (req, res) => {
     })
 });
 
-//route pour la création d'un nouveau pattern modifié pour un user en fct du token
+//route pour récuperer un document précis d'un user en fonction de son token et de l'id du document
+router.get("/:token/:id", (req, res) => {
+    User.findOne({token: req.params.token}).then(userData => {
+        if(!userData) {
+            res.json({result: false, message: "user token not found"})
+        } else {
+            Document.findOne({and:[{user: userData._id}, {_id: req.params.id}]}).populate('documentContent').then(data => {
+                if (!data) {
+                    res.json({result: false, message: "can't find this document"})
+                } else {
+                    res.json({result : true, Document : data})
+                }
+            })
+        }
+    })
+});
+
+//route pour la création d'un nouveau document pour un user en fct du token
 router.post('/', async (req, res) => {
     const photoPath = `./tmp/${uniqid()}.jpg`;
     const resultMove = await req.files.photoFromFront.mv(photoPath);
@@ -39,30 +56,32 @@ router.post('/', async (req, res) => {
       }
     
     if(!resultMove) {
-        const resultCloudinary = await cloudinary.uploader.upload(photoPath);
+        try {
+            const resultCloudinary = await cloudinary.uploader.upload(photoPath);
 
-        fs.unlinkSync(photoPath);
+            fs.unlinkSync(photoPath);
 
-        User.findOne({token: req.body.token}).then(data => {
-            if(data) {
-            const newDocument = new Document({
-                user: data._id,
-                fileName: req.body.fileName,
-                fileType: req.body.fileType,
-                creationDate: new Date(),
-                modificationDate: new Date(),
-                documentContent: req.body.documentContent,
-                documentMiniature: resultCloudinary.secure_url,
-            })
-            newDocument.save().then(newDoc => {
-                res.json({result: true, newDoc})
-            })
-            } else {
-                res.json({result: false, message: "user token not found"})
-            }
-        })    
+            const userData = await User.findOne({token: req.body.token})
+                if(userData) {
+                const newDocument = new Document({
+                    user: userData._id,
+                    fileName: req.body.fileName,
+                    fileType: req.body.fileType,
+                    creationDate: new Date(),
+                    modificationDate: new Date(),
+                    documentContent: req.body.documentContent,
+                    documentMiniature: resultCloudinary.secure_url,
+                })
+                const newDoc = await newDocument.save()
+                    res.json({result: true, newDoc})
+                } else {
+                    res.json({result: false, message: "user token not found"})
+                }
+        } catch (error) {
+            res.json({ result: false, error: error.message });
+        }
     } else {
-        res.json({ result: false, error: resultCopy });
+        res.json({ result: false, error: "Failed to move tmp file" });
     }
 })
 
@@ -77,26 +96,28 @@ router.put("/", async (req, res) => {
       }
     
     if(!resultMove) {
-        const resultCloudinary = await cloudinary.uploader.upload(photoPath);
+        try {
+            const resultCloudinary = await cloudinary.uploader.upload(photoPath);
 
-        fs.unlinkSync(photoPath);
-
-        Document.findOneAndUpdate({_id: req.body.id}, [
-            {fileName: req.body.fileName},
-            {fileType: req.body.fileType},
-            {modificationDate: new Date()},
-            {documentContent: req.body.documentContent},
-            {patternMiniature: resultCloudinary.secure_url}
-        ]).then(() => {
-            Document.findOne({_id: req.body.id}).then(modifDoc => {
-                res.json({result: true, modifDoc})
-            })
-        })
+            fs.unlinkSync(photoPath);
+    
+            const modifDoc = await Document.findOneAndUpdate({_id: req.body.id}, [
+                {fileName: req.body.fileName},
+                {fileType: req.body.fileType},
+                {modificationDate: new Date()},
+                {documentContent: req.body.documentContent},
+                {documentMiniature: resultCloudinary.secure_url}
+            ])
+            res.json({result: true, modifDoc})
+        } catch (error) {
+            res.json({ result: false, error: error.message });
+        }
     } else {
-        res.json({ result: false, error: resultCopy });
+        res.json({ result: false, error: "Failed to move tmp file" });
     }
 })
 
+//route delete UN document de la collection documents
 router.delete("/", (req, res) => {
     if (!checkbody(req.body.id)) {
         res.json({ result: false, error: 'Missing or empty fields' });

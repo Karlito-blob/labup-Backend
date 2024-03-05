@@ -12,18 +12,34 @@ const uniqid = require('uniqid');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 
-
-//route pour récuperer tous les patterns d'un user en fonction de son token (et dans un premier temps, à trier coté front pour récupérer UN pattern modif, j'effacerai ce bout de commmentaire quand la route dédiée sera prête)
+//route pour récuperer tous les modifiedPatterns d'un user en fonction de son token
 router.get('/:token', (req, res) => {
     User.findOne({token: req.params.token}).then(userData => {
-        if(!data) {
+        if(!userData) {
             res.json({result: false, message: "user token not found"})
         } else {
-            ModifiedPattern.find({user: userData._id}).then(data => {
+            ModifiedPattern.find({user: userData._id}).populate('initialPattern').then(data => {
                 if (data == []) {
                     res.json({result: false, message: "user don't have modified patterns"})
                 } else {
                     res.json({result : true, ModifiedPatterns : data})
+                }
+            })
+        }
+    })
+});
+
+//route pour récuperer un modifiedPattern précis d'un user en fonction de son token et de l'id du modifiedPattern
+router.get("/:token/:id", (req, res) => {
+    User.findOne({token: req.params.token}).then(userData => {
+        if(!userData) {
+            res.json({result: false, message: "user token not found"})
+        } else {
+            ModifiedPattern.findOne({and:[{user: userData._id}, {_id: req.params.id}]}).populate('initialPattern').then(data => {
+                if (!data) {
+                    res.json({result: false, message: "can't find this pattern"})
+                } else {
+                    res.json({result : true, ModifiedPattern : data})
                 }
             })
         }
@@ -35,37 +51,39 @@ router.post('/', async (req, res) => {
     const photoPath = `./tmp/${uniqid()}.jpg`;
     const resultMove = await req.files.photoFromFront.mv(photoPath);
     
-    if (!checkbody(req.body, ['token','idPattern','patternName', 'paramsModif', "fileName"])) {
+    if (!checkbody(req.body, ['token','initialPattern','patternName', 'paramsModif', "fileName"])) {
         res.json({ result: false, error: 'Missing or empty fields' });
         return;
       }
     
     if(!resultMove) {
-        const resultCloudinary = await cloudinary.uploader.upload(photoPath);
+        try {
+            const resultCloudinary = await cloudinary.uploader.upload(photoPath);
 
-        fs.unlinkSync(photoPath);
-
-        User.findOne({token: req.body.token}).then(data => {
-            if (data) {
-                const newModifiedPattern = new ModifiedPattern({
-                    user: data._id,
-                    initialPattern: req.body.idPattern,
-                    patternName: req.body.patternName,
-                    paramsModif: req.body.paramsModif,
-                    fileName: req.body.fileName,
-                    creationDate: new Date(),
-                    modificationDate: new Date(),
-                    patternMiniature: resultCloudinary.secure_url,
-                })
-                newModifiedPattern.save().then(newDoc => {
-                    res.json({result: true, newDoc})
-                })
-            } else {
-                res.json({result: false, message: "user token not found"})
-            }
-        })    
+            fs.unlinkSync(photoPath);
+    
+            const userData = await User.findOne({token: req.body.token})
+                if (userData) {
+                    const newModifiedPattern = new ModifiedPattern({
+                        user: userData._id,
+                        initialPattern: req.body.initialPattern,
+                        patternName: req.body.patternName,
+                        paramsModif: req.body.paramsModif,
+                        fileName: req.body.fileName,
+                        creationDate: new Date(),
+                        modificationDate: new Date(),
+                        patternMiniature: resultCloudinary.secure_url,
+                    })
+                    const newDoc = await newModifiedPattern.save()
+                        res.json({result: true, newDoc})
+                } else {
+                    res.json({result: false, message: "user token not found"})
+                } 
+        } catch (error) {
+            res.json({ result: false, error: error.message });
+        }
     } else {
-        res.json({ result: false, error: resultCopy });
+        res.json({ result: false, error: "Failed to move tmp file" });
     }
 })
 
@@ -80,26 +98,27 @@ router.put("/", async (req, res) => {
       }
     
     if(!resultMove) {
-        const resultCloudinary = await cloudinary.uploader.upload(photoPath);
+        try {
+            const resultCloudinary = await cloudinary.uploader.upload(photoPath);
 
-        fs.unlinkSync(photoPath);
-
-        ModifiedPattern.findOneAndUpdate({_id: req.body.id}, [
-            {paramsModif: req.body.paramsModif},
-            {fileName: req.body.fileName},
-            {modificationDate: new Date()},
-            {patternMiniature: resultCloudinary.secure_url}
-        ]).then(() => {
-            ModifiedPattern.findOne({_id: req.body.id}).then(modifDoc => {
-                res.json({result: true, modifDoc})
-            })
-        })
+            fs.unlinkSync(photoPath);
+    
+            const modifDoc = await ModifiedPattern.findOneAndUpdate({_id: req.body.id}, [
+                {paramsModif: req.body.paramsModif},
+                {fileName: req.body.fileName},
+                {modificationDate: new Date()},
+                {patternMiniature: resultCloudinary.secure_url}
+            ])
+            res.json({result: true, modifDoc})
+        } catch (error) {
+            res.json({ result: false, error: error.message });
+        }
     } else {
-        res.json({ result: false, error: resultCopy });
+        res.json({ result: false, error: "Failed to move tmp file" });
     }
 })
 
-//route delete UN modifiedpattern
+//route delete UN modifiedpattern de la collection modifiedPatterns
 router.delete("/", (req, res) => {
     if (!checkbody(req.body.id)) {
         res.json({ result: false, error: 'Missing or empty fields' });
