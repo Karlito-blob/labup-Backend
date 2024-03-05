@@ -68,28 +68,24 @@ router.post('/signin', (req, res) => {
 router.put('/update', async (req, res) => {
   
   try {
-    // Vérifiez que le corps de la requête a bien les champs nécessaires
-    if (!checkbody(req.body, ['userName', 'password', 'avatar', 'email'])) {
-      res.json({ result: false, error: 'Champ vide ou manquant' });
-      return;
+    let updateFields = {};
+
+    for (const key in req.body) {
+      if (key === "password") {
+        updateFields[key] = bcrypt.hashSync(req.body[key], 10) 
+      } else {
+        updateFields[key] = req.body[key]
+      }
     }
 
-    // Créez un objet de mise à jour avec les champs à mettre à jour
-    const updateFields = {
-      userName: req.body.userName,
-      password: bcrypt.hashSync(req.body.password, 10),
-      avatar: req.body.avatar,
-      email: req.body.email,
-    };
-
     // Utilisez updateOne() pour mettre à jour les champs spécifiés
-    const result = await userSchema.updateOne({ token: req.body.token }, updateFields);
+    const result = await User.updateOne({ token: req.body.token }, updateFields);
 
     // Ajoutez des logs pour le débogage
     console.log(result);
 
     // Vérifiez si la mise à jour a réussi (au moins un document a été filtré)
-    if (result.n > 0 && result.ok === 1) {
+    if (result.modifiedCount > 0) {
       res.json({ result: true, user: updateFields });
     } else {
       res.json({ result: false, error: 'Aucun utilisateur mis à jour' });
@@ -100,6 +96,21 @@ router.put('/update', async (req, res) => {
   }
 });
  
+
+//--> Route delete un compte
+
+router.delete("/delete", (req, res) => {
+  User.findOne({ token: req.body.token }).then(data => {
+      if(data) {
+          User.deleteOne({ token: req.body.token }).then(() => {
+          res.json({result: true, message: "utilisateur supprimé"})
+          })
+      } else {
+          res.json({result: false, message: "utilisateur introuvable"})
+      }
+  })
+})
+
 
 module.exports = router;
 
