@@ -12,7 +12,8 @@ active: Boolean,
 
 const initalPatternSchema = mongoose.Schema({
     patternName: String,
-    params: [{}]
+    params: [{}],
+    intialePatternMiniature: String
 });
 
 const InitialPattern = mongoose.model('initialPatterns', initalPatternSchema);
