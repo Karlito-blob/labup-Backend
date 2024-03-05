@@ -14,7 +14,7 @@ const bcrypt = require('bcrypt');
 
 router.post('/signup', (req, res) => {
 
-  if (!checkbody(req.body, ['userName', 'password'])) {
+  if (!checkbody(req.body, ['userName', 'password', "email"])) {
     res.json({ result: false, error: 'Champ vide ou manquant' });
     return;
   }

@@ -25,10 +25,14 @@ router.get('/:token', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-    User.findOne({token: req.body.token}).then(data => {
-        if (data) {
+    if (!checkbody(req.body, ['token', 'projectName', "public"])) {
+        res.json({ result: false, error: 'Missing or empty fields' });
+        return;
+    }
+    User.findOne({token: req.body.token}).then(userData => {
+        if (userData) {
             const newFolder = new Folder({
-                user: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
+                user: userData._id,
                 projectName: req.body.projectName,
                 creationDate: new Date(),
                 modificationDate: new Date(),
@@ -43,6 +47,61 @@ router.post('/', (req, res) => {
             res.json({result: false, message: "user token not found"})
         }
     })
+})
+
+router.put("/addPattern", async (req, res) => {
+    try {
+        const result = await Folder.findOneAndUpdate({_id: req.body.idFolder},{ $push: {patterns: req.body.idPattern}})
+        console.log(result)
+        result ? res.json({result: true, file: result}) : res.json({result: false, error: "no file found"})
+    } catch (error) {
+        console.error(error);
+        res.json({ result: false, message: "An error occurred when updating the file" });
+    }
+})
+
+router.put("/addDocument", async (req, res) => {
+    try {
+        const result = await Folder.findOneAndUpdate({_id: req.body.idFolder},{ $push: {documents: req.body.idDocument}})
+        console.log(result)
+        result ? res.json({result: true, file: result}) : res.json({result: false, error: "no file found"})
+    } catch (error) {
+        console.error(error);
+        res.json({ result: false, message: "An error occurred when updating the file" });
+    }
+})
+
+router.delete("/deletePattern", async (req, res) => {
+    try {
+        const result = await Folder.findOneAndUpdate({_id: req.body.idFolder},{ $pull: {patterns: req.body.idPattern}})
+        console.log(result)
+        result ? res.json({result: true, file: result}) : res.json({result: false, error: "no file found"})
+    } catch (error) {
+        console.error(error);
+        res.json({ result: false, message: "An error occurred when updating the file" });
+    }
+})
+
+router.delete("/deleteDocument", async (req, res) => {
+    try {
+        const result = await Folder.findOneAndUpdate({_id: req.body.idFolder},{ $pull: {documents: req.body.idDocument}})
+        console.log(result)
+        result ? res.json({result: true, file: result}) : res.json({result: false, error: "no file found"})
+    } catch (error) {
+        console.error(error);
+        res.json({ result: false, message: "An error occurred when updating the file" });
+    }
+})
+
+router.delete("/:idFolder", async (req, res) => {
+    try {
+        const result = await Folder.findOneAndDelete({_id : req.params.idFolder})
+        console.log(result)
+        result ? res.json({result: true, file: result}) : res.json({result: false, error: "no file found"})
+    } catch (error) {
+        console.error(error);
+        res.json({ result: false, message: "An error occurred when deleting the file" })
+    }
 })
 
 module.exports = router;

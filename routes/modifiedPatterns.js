@@ -16,10 +16,10 @@ const fs = require('fs');
 //route pour récuperer tous les patterns d'un user en fonction de son token (et dans un premier temps, à trier coté front pour récupérer UN pattern modif, j'effacerai ce bout de commmentaire quand la route dédiée sera prête)
 router.get('/:token', (req, res) => {
     User.findOne({token: req.params.token}).then(userData => {
-        if(!data) {
+        if(!userData) {
             res.json({result: false, message: "user token not found"})
         } else {
-            ModifiedPattern.find({user: userData._id}).then(data => {
+            ModifiedPattern.find({user: userData._id}).populate('initialPattern').then(data => {
                 if (data == []) {
                     res.json({result: false, message: "user don't have modified patterns"})
                 } else {
@@ -35,7 +35,7 @@ router.post('/', async (req, res) => {
     const photoPath = `./tmp/${uniqid()}.jpg`;
     const resultMove = await req.files.photoFromFront.mv(photoPath);
     
-    if (!checkbody(req.body, ['token','idPattern','patternName', 'paramsModif', "fileName"])) {
+    if (!checkbody(req.body, ['token','initialPattern','patternName', 'paramsModif', "fileName"])) {
         res.json({ result: false, error: 'Missing or empty fields' });
         return;
       }
@@ -45,11 +45,11 @@ router.post('/', async (req, res) => {
 
         fs.unlinkSync(photoPath);
 
-        User.findOne({token: req.body.token}).then(data => {
-            if (data) {
+        User.findOne({token: req.body.token}).then(userData => {
+            if (userData) {
                 const newModifiedPattern = new ModifiedPattern({
-                    user: data._id,
-                    initialPattern: req.body.idPattern,
+                    user: userData._id,
+                    initialPattern: req.body.initialPattern,
                     patternName: req.body.patternName,
                     paramsModif: req.body.paramsModif,
                     fileName: req.body.fileName,

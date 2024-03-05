@@ -17,7 +17,7 @@ router.get('/:token', (req, res) => {
         if(!userData) {
             res.json({result: false, message: "user token not found"})
         } else {
-            Document.find({user: userData._id}).then(data => {
+            Document.find({user: userData._id}).populate('documentContent').then(data => {
                 if (data == []) {
                     res.json({result: false, message: "user don't have  documents"})
                 } else {
@@ -43,10 +43,10 @@ router.post('/', async (req, res) => {
 
         fs.unlinkSync(photoPath);
 
-        User.findOne({token: req.body.token}).then(data => {
-            if(data) {
+        User.findOne({token: req.body.token}).then(userData => {
+            if(userData) {
             const newDocument = new Document({
-                user: data._id,
+                user: userData._id,
                 fileName: req.body.fileName,
                 fileType: req.body.fileType,
                 creationDate: new Date(),
