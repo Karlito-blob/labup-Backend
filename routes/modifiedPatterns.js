@@ -15,11 +15,11 @@ const fs = require('fs');
 
 //route pour récuperer tous les patterns d'un user en fonction de son token (et dans un premier temps, à trier coté front pour récupérer UN pattern modif, j'effacerai ce bout de commmentaire quand la route dédiée sera prête)
 router.get('/:token', (req, res) => {
-    User.findOne({token: req.params.token}).then(data => {
+    User.findOne({token: req.params.token}).then(userData => {
         if(!data) {
             res.json({result: false, message: "user token not found"})
         } else {
-            ModifiedPattern.find({}).then(data => {
+            ModifiedPattern.find({user: userData._id}).then(data => {
                 if (data == []) {
                     res.json({result: false, message: "user don't have modified patterns"})
                 } else {
@@ -46,19 +46,23 @@ router.post('/', async (req, res) => {
         fs.unlinkSync(photoPath);
 
         User.findOne({token: req.body.token}).then(data => {
-            const newModifiedPattern = new ModifiedPattern({
-                idUser: data._id,
-                idPattern: req.body.idPattern,
-                patternName: req.body.patternName,
-                paramsModif: req.body.paramsModif,
-                fileName: req.body.fileName,
-                creationDate: new Date(),
-                modificationDate: new Date(),
-                patternMiniature: resultCloudinary.secure_url,
-            })
-            newModifiedPattern.save().then(newDoc => {
-                res.json({result: true, newDoc})
-            })
+            if (data) {
+                const newModifiedPattern = new ModifiedPattern({
+                    user: data._id,
+                    initialPattern: req.body.idPattern,
+                    patternName: req.body.patternName,
+                    paramsModif: req.body.paramsModif,
+                    fileName: req.body.fileName,
+                    creationDate: new Date(),
+                    modificationDate: new Date(),
+                    patternMiniature: resultCloudinary.secure_url,
+                })
+                newModifiedPattern.save().then(newDoc => {
+                    res.json({result: true, newDoc})
+                })
+            } else {
+                res.json({result: false, message: "user token not found"})
+            }
         })    
     } else {
         res.json({ result: false, error: resultCopy });
@@ -95,6 +99,7 @@ router.put("/", async (req, res) => {
     }
 })
 
+//route delete UN modifiedpattern
 router.delete("/", (req, res) => {
     if (!checkbody(req.body.id)) {
         res.json({ result: false, error: 'Missing or empty fields' });

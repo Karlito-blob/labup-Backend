@@ -13,11 +13,11 @@ const fs = require('fs');
 
 //route pour récuperer tous les documents d'un user en fonction de son token (et dans un premier temps, à trier coté front pour récupérer UN document précis, j'effacerai ce bout de commmentaire quand la route dédiée sera prête)
 router.get('/:token', (req, res) => {
-    User.findOne({token: req.params.token}).then(data => {
+    User.findOne({token: req.params.token}).then(userData => {
         if(!data) {
             res.json({result: false, message: "user token not found"})
         } else {
-            Document.find({}).then(data => {
+            Document.find({user: userData._id}).then(data => {
                 if (data == []) {
                     res.json({result: false, message: "user don't have  documents"})
                 } else {
@@ -44,8 +44,9 @@ router.post('/', async (req, res) => {
         fs.unlinkSync(photoPath);
 
         User.findOne({token: req.body.token}).then(data => {
+            if(data) {
             const newDocument = new Document({
-                idUser: data._id,
+                user: data._id,
                 fileName: req.body.fileName,
                 fileType: req.body.fileType,
                 creationDate: new Date(),
@@ -56,6 +57,9 @@ router.post('/', async (req, res) => {
             newDocument.save().then(newDoc => {
                 res.json({result: true, newDoc})
             })
+            } else {
+                res.json({result: false, message: "user token not found"})
+            }
         })    
     } else {
         res.json({ result: false, error: resultCopy });

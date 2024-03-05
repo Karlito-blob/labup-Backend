@@ -9,11 +9,11 @@ const Folder = require("../models/folder")
 const { checkbody } = require('../modules/checkbody');
 
 router.get('/:token', (req, res) => {
-    User.findOne({token: req.params.token}).then(data => {
+    User.findOne({token: req.params.token}).then(userData => {
         if(!data) {
             res.json({result: false, message: "user token not found"})
         } else {
-            Folder.find({}).then(data => {
+            Folder.find({user: userData._id}).then(data => {
                 if (data == []) {
                     res.json({result: false, message: "user don't have folders"})
                 } else {
@@ -24,7 +24,26 @@ router.get('/:token', (req, res) => {
     })
 });
 
-
+router.post('/', (req, res) => {
+    User.findOne({token: req.body.token}).then(data => {
+        if (data) {
+            const newFolder = new Folder({
+                user: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
+                projectName: req.body.projectName,
+                creationDate: new Date(),
+                modificationDate: new Date(),
+                patterns: [],
+                documents: [],
+                public: req.body.public,
+            })
+            newFolder.save().then(newDoc => {
+                res.json({result: true, newDoc})
+            })
+        } else {
+            res.json({result: false, message: "user token not found"})
+        }
+    })
+})
 
 
 
