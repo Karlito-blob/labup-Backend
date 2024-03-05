@@ -1,16 +1,18 @@
 const mongoose = require('mongoose');
 
+/*
+paramName: String,
+type: String,
+couleur: String,
+valeurInitiale: Number,
+valeurMin: Number,
+valeurMax: Number,
+active: Boolean,
+*/
+
 const initalPatternSchema = mongoose.Schema({
     patternName: String,
-    params: [{
-        paramName: String,
-        type: String,
-        couleur: String,
-        valeurInitiale: Number,
-        valeurMin: Number,
-        valeurMax: Number,
-        active: Boolean,
-    }]
+    params: [{}]
 });
 
 const InitialPattern = mongoose.model('initialPatterns', initalPatternSchema);

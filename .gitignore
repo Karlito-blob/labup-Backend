@@ -63,3 +63,4 @@ typings/
 # misc
 .DS_Store
 *.pem
+brouillon.js

@@ -11,6 +11,8 @@ require('./models/connection');
 var usersRouter = require('./routes/users');
 var initialPatternsRouter = require('./routes/initialPatterns')
 var modifiedPatternsRouter = require('./routes/initialPatterns')
+var documentsRouter = require("./routes/documents")
+var foldersRouter = require("./routes/folders")
 
 var app = express();
 
@@ -24,7 +26,9 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/users', usersRouter);
-app.use('/initialPatterns', initialPatternsRouter)
-app.use('/modifiedPatterns', modifiedPatternsRouter)
+app.use('/initialPatterns', initialPatternsRouter);
+app.use('/modifiedPatterns', modifiedPatternsRouter);
+app.use('/documents', documentsRouter);
+app.use("/folders", foldersRouter)
 
 module.exports = app;

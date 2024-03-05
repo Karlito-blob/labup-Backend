@@ -1,16 +1,16 @@
 const mongoose = require('mongoose');
 
-const foldersSchema = mongoose.Schema({
+const folderSchema = mongoose.Schema({
     idUSer: String,
-    projectName: string,
+    projectName: String,
     creationDate: Date,
     modificationDate: Date,
-    patterns: [{ type: mongoose.Schema.Types.ObjectId, ref: "modifiedPattern" }],
+    patterns: [{ type: mongoose.Schema.Types.ObjectId, ref: "modifiedPatterns" }],
     documents: [{ type: mongoose.Schema.Types.ObjectId, ref: "documents" }],
     public: Boolean,
 
 });
 
-const Folders = mongoose.model('folders', foldersSchema);
+const Folder = mongoose.model('folders', folderSchema);
 
-module.exports = Folders;
+module.exports = Folder;
