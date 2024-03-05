@@ -14,7 +14,7 @@ const fs = require('fs');
 //route pour récuperer tous les documents d'un user en fonction de son token (et dans un premier temps, à trier coté front pour récupérer UN document précis, j'effacerai ce bout de commmentaire quand la route dédiée sera prête)
 router.get('/:token', (req, res) => {
     User.findOne({token: req.params.token}).then(userData => {
-        if(!data) {
+        if(!userData) {
             res.json({result: false, message: "user token not found"})
         } else {
             Document.find({user: userData._id}).then(data => {
