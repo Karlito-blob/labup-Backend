@@ -17,8 +17,7 @@ const documentSchema = mongoose.Schema({
     creationDate: Date,
     modificationDate: Date,
     documentContent: [documentContentSchema],
-    documentMiniature: String,
-
+    documentImg: String,
 });
 
 const Document = mongoose.model('documents', documentSchema);

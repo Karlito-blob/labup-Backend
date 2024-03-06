@@ -72,7 +72,7 @@ router.post('/', async (req, res) => {
                         fileName: req.body.fileName,
                         creationDate: new Date(),
                         modificationDate: new Date(),
-                        patternMiniature: resultCloudinary.secure_url,
+                        patternImg: resultCloudinary.secure_url,
                     })
                     const newDoc = await newModifiedPattern.save()
                         res.json({result: true, newDoc})
@@ -107,7 +107,7 @@ router.put("/", async (req, res) => {
                 {paramsModif: req.body.paramsModif,
                 fileName: req.body.fileName,
                 modificationDate: new Date(),
-                patternMiniature: resultCloudinary.secure_url})
+                patternImg: resultCloudinary.secure_url})
             res.json({result: true, modifDoc})
         } catch (error) {
             res.json({ result: false, error: error.message });

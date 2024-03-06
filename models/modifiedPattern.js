@@ -17,7 +17,7 @@ const modifiedPatternSchema = mongoose.Schema({
     fileName: String,
     creationDate: Date,
     modificationDate: Date,
-    patternMiniature: String,
+    patternImg: String,
 });
 
 const ModifiedPattern = mongoose.model('modifiedPatterns', modifiedPatternSchema);
