@@ -60,7 +60,7 @@ router.get("/:token/:id", (req, res) => {
 
 //route pour la création d'un nouveau pattern modifié pour un user en fct du token
 router.post('/', async (req, res) => {
-    const photoPath = `./tmp/${uniqid()}.jpg`;
+    const photoPath = `./tmp/${uniqid()}.png`;
     const resultMove = await req.files.photoFromFront.mv(photoPath);
     
     if (!checkbody(req.body, ['token','initialPattern','patternName', 'paramsModif', "fileName"])) {
