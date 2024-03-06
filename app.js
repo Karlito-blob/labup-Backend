@@ -10,7 +10,7 @@ require('./models/connection');
 
 var usersRouter = require('./routes/users');
 var initialPatternsRouter = require('./routes/initialPatterns');
-var modifiedPatternsRouter = require('./routes/initialPatterns');
+var modifiedPatternsRouter = require('./routes/modifiedPatterns');
 var documentsRouter = require("./routes/documents");
 var foldersRouter = require("./routes/folders");
 var fontsRouter = require("./routes/fonts");

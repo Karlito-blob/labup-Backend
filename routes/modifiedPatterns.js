@@ -12,6 +12,18 @@ const uniqid = require('uniqid');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 
+//route de test pour recuperer tous les modifiedPatterns de tous les users
+router.get('/', (req, res) => {
+        ModifiedPattern.find({}).populate('initialPattern').then(data => {
+            if (data.length === 0) {
+                res.json({result: false, message: "can't find modified patterns"})
+            } else {
+                res.json({result : true, ModifiedPatterns : data})
+            }
+        })
+    }
+)
+
 //route pour récuperer tous les modifiedPatterns d'un user en fonction de son token
 router.get('/:token', (req, res) => {
     User.findOne({token: req.params.token}).then(userData => {
