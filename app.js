@@ -20,6 +20,13 @@ var app = express();
 const cors = require('cors');
 app.use(cors());
 
+const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({ extended: true }));
+
+var multer = require('multer');
+var upload = multer();
+app.use(express.static('public'));
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -28,7 +35,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/users', usersRouter);
 app.use('/initialPatterns', initialPatternsRouter);
-app.use('/modifiedPatterns', modifiedPatternsRouter);
+app.use('/modifiedPatterns', upload.single('photoFromFront'), modifiedPatternsRouter);
 app.use('/documents', documentsRouter);
 app.use("/folders", foldersRouter);
 app.use('/fonts', fontsRouter);

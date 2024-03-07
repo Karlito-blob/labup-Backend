@@ -14,4 +14,14 @@ router.get('/', (req, res) => {
     })
 });
 
+
+router.get('/:id', (req, res) => {
+    InitialPattern.findOne({_id: req.params.id}).then(data => {
+        if (data) {
+            res.json({result : true , InitialPattern: data})
+        } else {
+            res.json({result: false})
+        }
+    })
+});
 module.exports = router;
