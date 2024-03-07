@@ -9,7 +9,6 @@ const uid2 = require('uid2');
 const bcrypt = require('bcrypt');
 
 
-
 //--> Route Post signup
 
 router.post('/signup', (req, res) => {
@@ -44,21 +43,25 @@ router.post('/signup', (req, res) => {
 });
 
 
-
 //--> Route Post signin
 
 router.post('/signin', (req, res) => {
 
-  if (!checkbody(req.body, ['userName', 'password'])) {
+  if (!checkbody(req.body, ['credential', 'password'])) {
     res.json({ result: false, error: 'Champ vide ou manquant' });
     return;
   }
 
-  User.findOne({ userName: req.body.userName }).then(data => {
+  User.findOne({
+    $or: [{ userName: req.body.credential }, { email: req.body.credential }],
+  }).then((data) => {
     if (data && bcrypt.compareSync(req.body.password, data.password)) {
       res.json({ result: true, token: data.token, userName: data.userName });
     } else {
-      res.json({ result: false, error: 'Utilisateur non trouvé ou mot de passe erroné' });
+      res.json({
+        result: false,
+        error: 'Utilisateur non trouvé ou mot de passe erroné',
+      });
     }
   });
 });
