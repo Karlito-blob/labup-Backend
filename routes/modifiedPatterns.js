@@ -11,6 +11,9 @@ const { checkbody } = require('../modules/checkbody');
 const uniqid = require('uniqid');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
+const util = require('util');
+const writeFileAsync = util.promisify(fs.writeFile);
+const unlinkAsync = util.promisify(fs.unlink);
 
 
 //route de test pour recuperer tous les modifiedPatterns de tous les users
@@ -61,31 +64,26 @@ router.get("/:token/:id", (req, res) => {
 
 //route pour la création d'un nouveau pattern modifié pour un user en fct du token
 router.post('/', async (req, res) => {
-    try {
-        console.log(req.file);
-        console.log(req.body.token)
-        res.json({ result: true, error: "YES" });
-    } catch (error) {
-        res.json({ result: false, error: "MERDE" });
-    }
-    
     // if (!checkbody(req.body, ['token','initialPattern','patternName', 'paramsModif', "fileName"])) {
     //     res.json({ result: false, error: 'Missing or empty fields' });
     //     return;
     // }
 
+    // Sauvegardez le contenu du fichier dans un fichier temporaire sur votre serveur
+
     const photoPath = `./tmp/${uniqid()}.png`;
-    //const resultMove = await req.file.photoFromFront.mv(photoPath);
-    const resultMove = await req.file.mv(photoPath);
-    
+    //const resultMove = await req.file.mv(photoPath);
+    const resultMove = await writeFileAsync(photoPath, req.file.buffer);
+
     if(!resultMove) {
         try {
-            const resultCloudinary = await cloudinary.uploader.upload(photoPath);
-        } catch (error) {
-            res.json({ result: false, error: "probl upload cloudinary" });
-        }
-        try {
-            fs.unlinkSync(photoPath);
+            // Téléverse le fichier temporaire sur Cloudinary
+            const resultCloudinary = await cloudinary.uploader.upload(photoPath)
+
+            // Supprime le fichier temporaire après l'upload sur Cloudinary
+            //fs.unlinkSync(photoPath);
+            await unlinkAsync(photoPath);
+        
             const userData = await User.findOne({token: req.body.token})
                 if (userData) {
                     const newModifiedPattern = new ModifiedPattern({
