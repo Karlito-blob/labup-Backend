@@ -11,7 +11,7 @@ valeurMax: Number,
 
 const modifiedPatternSchema = mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: "users" }, 
-    initialPattern: { type: mongoose.Schema.Types.ObjectId, ref: "initalPatterns" },
+    initialPattern: { type: mongoose.Schema.Types.ObjectId, ref: "initialPatterns" },
     patternName: String,
     paramsModif: [{}],
     fileName: String,

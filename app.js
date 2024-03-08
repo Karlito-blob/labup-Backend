@@ -4,8 +4,8 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-const mongoose = require('mongoose');
 
+const mongoose = require('mongoose');
 require('./models/connection');
 
 var usersRouter = require('./routes/users');
@@ -20,11 +20,14 @@ var app = express();
 const cors = require('cors');
 app.use(cors());
 
+//middleware pour bodyoarser
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
 
+//middleware pour gestion des multiples forms data
 var multer = require('multer');
 var upload = multer();
+
 app.use(express.static('public'));
 
 app.use(logger('dev'));

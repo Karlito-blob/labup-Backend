@@ -10,12 +10,12 @@ valeurMax: Number,
 active: Boolean,
 */
 
-const initalPatternSchema = mongoose.Schema({
+const initialPatternSchema = mongoose.Schema({
     patternName: String,
     params: [{}],
     intialePatternMiniature: String
 });
 
-const InitialPattern = mongoose.model('initialPatterns', initalPatternSchema);
+const InitialPattern = mongoose.model('initialPatterns', initialPatternSchema);
 
 module.exports = InitialPattern;
