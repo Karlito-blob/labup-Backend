@@ -79,13 +79,15 @@ router.post('/', async (req, res) => {
                 const userData = await User.findOne({token: req.body.token});
                 
                 if (userData) {
+                    const documentContent = JSON.parse(req.body.documentContent);
+
                     const newDocument = new Document({
                         user: userData._id,
                         fileName: req.body.fileName,
                         fileType: req.body.fileType,
                         creationDate: new Date(),
                         modificationDate: new Date(),
-                        documentContent: req.body.documentContent,
+                        documentContent: documentContent,
                         documentImg: resultCloudinary.secure_url,
                     })
                     const newDoc = await newDocument.save()
