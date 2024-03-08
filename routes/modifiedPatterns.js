@@ -17,7 +17,7 @@ const writeFileAsync = util.promisify(fs.writeFile);
 const unlinkAsync = util.promisify(fs.unlink);
 
 
-//route de test pour recuperer tous les modifiedPatterns de tous les users
+//route de test pour recuperer tous les modifiedPatterns de tous les users OK
 router.get('/', async (req, res) => {
     try {
         const data = await ModifiedPattern.find({}).populate('initialPattern');
@@ -32,7 +32,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-//route pour récuperer tous les modifiedPatterns d'un user en fonction de son token
+//route pour récuperer tous les modifiedPatterns d'un user en fonction de son token OK
 router.get('/:token', async (req, res) => {
     try {
         const userData = await User.findOne({ token: req.params.token });
@@ -54,7 +54,7 @@ router.get('/:token', async (req, res) => {
     }
 });
 
-//route pour récuperer un modifiedPattern précis d'un user en fonction de son token et de l'id du modifiedPattern
+//route pour récuperer un modifiedPattern précis d'un user en fonction de son token et de l'id du modifiedPattern OK
 router.get("/:token/:id", async (req, res) => {
     try {
         const userData = await User.findOne({ token: req.params.token });
@@ -77,7 +77,7 @@ router.get("/:token/:id", async (req, res) => {
 });
 
 
-//route pour la création d'un nouveau pattern modifié pour un user en fct du token
+//route pour la création d'un nouveau pattern modifié pour un user en fct du token OK
 router.post('/', async (req, res) => {
     try {
         if (!checkbody(req.body, ['token','initialPattern','patternName', 'paramsModif', "fileName"])) {
@@ -113,17 +113,20 @@ router.post('/', async (req, res) => {
                     throw new Error('User token not found');
                 } 
             } catch (error) {
-                throw new Error('Problem with Cloudinary upload or database operation');
+                console.error('An error occurred:', error);
+                return res.status(500).json({ result: false, error: 'Problem with Cloudinary upload or database operation'});
             }
         } else {
+            await unlinkAsync(photoPath);
             throw new Error('Failed to move tmp file');
         }
     } catch (error) {
-        res.json({ result: false, error: error.message });
+        console.error('An error occurred:', error);
+        return res.status(500).json({ result: false, error: error.message});
     }
 });
 
-//route pour update un pattern (il reste toujours dans son statut de "modifiedPattern"), pour le moment sans token car je nen vois pas l'utilité vu que chaque _id de pattern modif est unique sur Mongo...
+//route pour update un pattern (il reste toujours dans son statut de "modifiedPattern"), pour le moment sans token car je nen vois pas l'utilité vu que chaque _id de pattern modif est unique sur Mongo... A TESTER EN LIVE
 router.put("/", async (req, res) => {
     try {
         if (!checkbody(req.body, ['paramsModif', "fileName", "id"])) {
@@ -147,45 +150,18 @@ router.put("/", async (req, res) => {
 
                 res.json({result: true, modifDoc})
             } catch (error) {
-                throw new Error('Problem with Cloudinary upload or database operation');
+                console.error('An error occurred:', error);
+                return res.status(500).json({ result: false, error: 'Problem with Cloudinary upload or database operation'});
             }
         } else {
+            await unlinkAsync(photoPath);
             throw new Error("Failed to move tmp file")
         }
     } catch (error) {
-        res.json({ result: false, error: error.message });
+        console.error('An error occurred:', error);
+        return res.status(500).json({ result: false, error: error.message});
     }
 })
-
-
-// router.put("/", async (req, res) => {
-//     const photoPath = `./tmp/${uniqid()}.jpg`;
-//     const resultMove = await req.files.photoFromFront.mv(photoPath);
-    
-//     if (!checkbody(req.body, ['paramsModif', "fileName", "id"])) {
-//         res.json({ result: false, error: 'Missing or empty fields' });
-//         return;
-//       }
-    
-//     if(!resultMove) {
-//         try {
-//             const resultCloudinary = await cloudinary.uploader.upload(photoPath);
-
-//             fs.unlinkSync(photoPath);
-    
-//             const modifDoc = await ModifiedPattern.findOneAndUpdate({_id: req.body.id}, 
-//                 {paramsModif: req.body.paramsModif,
-//                 fileName: req.body.fileName,
-//                 modificationDate: new Date(),
-//                 patternImg: resultCloudinary.secure_url})
-//             res.json({result: true, modifDoc})
-//         } catch (error) {
-//             res.json({ result: false, error: error.message });
-//         }
-//     } else {
-//         res.json({ result: false, error: "Failed to move tmp file" });
-//     }
-// })
 
 //route delete UN modifiedpattern de la collection modifiedPatterns
 router.delete("/:id", async (req, res) => {

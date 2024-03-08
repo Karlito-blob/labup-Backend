@@ -3,6 +3,8 @@ var router = express.Router();
 //import connection data base
 require('../models/connection');
 const User = require('../models/users');
+const initialPattern = require('../models/initialPattern');
+const ModifiedPattern = require("../models/modifiedPattern");
 const Document = require("../models/document");
 //import module checkbody
 const { checkbody } = require('../modules/checkbody');
@@ -10,39 +12,52 @@ const { checkbody } = require('../modules/checkbody');
 const uniqid = require('uniqid');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
+const util = require('util');
+const writeFileAsync = util.promisify(fs.writeFile);
+const unlinkAsync = util.promisify(fs.unlink);
 
 //route pour récuperer tous les documents d'un user en fonction de son token (IL FAUDRA PEUT ETRE SUPPRIMER LE POPULATE LIGNE 20 PAS SUR QUIL SOIT UTILE POUR UN SOUS-DOCUMENT)
-router.get('/:token', (req, res) => {
-    User.findOne({token: req.params.token}).then(userData => {
-        if(!userData) {
-            res.json({result: false, message: "user token not found"})
-        } else {
-            Document.find({user: userData._id}).populate('documentContent').then(data => {
-                if (data.length === 0) {
-                    res.json({result: false, message: "user don't have any documents"})
-                } else {
-                    res.json({result : true, Documents : data})
-                }
-            })
+router.get('/:token', async (req, res) => {
+    try {
+        const userData = await User.findOne({ token: req.params.token });
+
+        if (!userData) {
+            res.json({ result: false, message: "User token not found" });
+            return;
         }
-    })
+
+        const data = await Document.find({ user: userData._id }).populate('documentContent');
+
+        if (data.length === 0) {
+            res.json({ result: false, message: "User doesn't have any documents" });
+        } else {
+            res.json({ result: true, Documents: data });
+        }
+    } catch (error) {
+        res.status(500).json({ result: false, error: error.message });
+    }
 });
 
 //route pour récuperer un document précis d'un user en fonction de son token et de l'id du document
-router.get("/:token/:id", (req, res) => {
-    User.findOne({token: req.params.token}).then(userData => {
-        if(!userData) {
-            res.json({result: false, message: "user token not found"})
-        } else {
-            Document.findOne({user: userData._id, _id: req.params.id}).populate('documentContent').then(data => {
-                if (!data) {
-                    res.json({result: false, message: "can't find this document"})
-                } else {
-                    res.json({result : true, Document : data})
-                }
-            })
+router.get("/:token/:id", async (req, res) => {
+    try {
+        const userData = await User.findOne({ token: req.params.token });
+
+        if (!userData) {
+            res.json({ result: false, message: "User token not found" });
+            return;
         }
-    })
+
+        const data = await Document.findOne({ user: userData._id, _id: req.params.id }).populate('documentContent');
+
+        if (!data) {
+            res.json({ result: false, message: "Can't find this document" });
+        } else {
+            res.json({ result: true, Document: data });
+        }
+    } catch (error) {
+        res.status(500).json({ result: false, error: error.message });
+    }
 });
 
 //route pour la création d'un nouveau document pour un user en fct du token
@@ -79,55 +94,18 @@ router.post('/', async (req, res) => {
                     throw new Error('User token not found');
                 } 
             } catch (error) {
-                throw new Error('Problem with Cloudinary upload or database operation');
+                console.error('An error occurred:', error);
+                return res.status(500).json({ result: false, error: 'Problem with Cloudinary upload or database operation'});
             }
         } else {
+            await unlinkAsync(photoPath);
             throw new Error('Failed to move tmp file');
         }
     } catch (error) {
-        res.json({ result: false, error: error.message });
+        console.error('An error occurred:', error);
+        res.status(500).json({ result: false, error: error.message});
     }
 });
-
-// router.post('/', async (req, res) => {
-
-//     const photoPath = `./tmp/${uniqid()}.jpg`;
-//     const resultMove = await req.files.photoFromFront.mv(photoPath);
-    
-//     if (!checkbody(req.body, ['token','fileName','fileType', 'documentContent'])) {
-//         res.json({ result: false, error: 'Missing or empty fields' });
-//         return;
-//       }
-    
-//     if(!resultMove) {
-//         try {
-//             const resultCloudinary = await cloudinary.uploader.upload(photoPath);
-
-//             fs.unlinkSync(photoPath);
-
-//             const userData = await User.findOne({token: req.body.token})
-//                 if(userData) {
-//                 const newDocument = new Document({
-//                     user: userData._id,
-//                     fileName: req.body.fileName,
-//                     fileType: req.body.fileType,
-//                     creationDate: new Date(),
-//                     modificationDate: new Date(),
-//                     documentContent: req.body.documentContent,
-//                     documentImg: resultCloudinary.secure_url,
-//                 })
-//                 const newDoc = await newDocument.save()
-//                     res.json({result: true, newDoc})
-//                 } else {
-//                     res.json({result: false, message: "user token not found"})
-//                 }
-//         } catch (error) {
-//             res.json({ result: false, error: error.message });
-//         }
-//     } else {
-//         res.json({ result: false, error: "Failed to move tmp file" });
-//     }
-// })
 
 //route pour update un pattern (il reste toujours dans son statut de "document"), pour le moment sans token car je nen vois pas l'utilité vu que chaque _id de document est unique sur Mongo...
 router.put("/", async (req, res) => {
@@ -161,16 +139,19 @@ router.put("/", async (req, res) => {
 })
 
 //route delete UN document de la collection documents
-router.delete("/:id", (req, res) => {
-    Document.findOne({_id: req.params.id}).then(data => {
-        if(data) {
-            Document.deleteOne({_id: data._id}).then(() => {
-            res.json({result: true, message: "document delete"})
-            })
+router.delete("/:id", async (req, res) => {
+    try {
+        const data = await Document.findOne({ _id: req.params.id });
+
+        if (data) {
+            await Document.deleteOne({ _id: data._id });
+            res.json({ result: true, message: "Document deleted" });
         } else {
-            res.json({result: false, message: "document not found"})
+            res.json({ result: false, message: "Document not found" });
         }
-    })
-})
+    } catch (error) {
+        res.status(500).json({ result: false, error: error.message });
+    }
+});
 
 module.exports = router;

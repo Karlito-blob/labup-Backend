@@ -39,7 +39,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/users', usersRouter);
 app.use('/initialPatterns', initialPatternsRouter);
 app.use('/modifiedPatterns', upload.single('photoFromFront'), modifiedPatternsRouter);
-app.use('/documents', documentsRouter);
+app.use('/documents', upload.single('photoFromFront'), documentsRouter);
 app.use("/folders", foldersRouter);
 app.use('/fonts', fontsRouter);
 
