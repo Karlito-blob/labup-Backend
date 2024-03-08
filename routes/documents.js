@@ -47,43 +47,87 @@ router.get("/:token/:id", (req, res) => {
 
 //route pour la création d'un nouveau document pour un user en fct du token
 router.post('/', async (req, res) => {
-    const photoPath = `./tmp/${uniqid()}.jpg`;
-    const resultMove = await req.files.photoFromFront.mv(photoPath);
-    
-    if (!checkbody(req.body, ['token','fileName','fileType', 'documentContent'])) {
-        res.json({ result: false, error: 'Missing or empty fields' });
-        return;
-      }
-    
-    if(!resultMove) {
-        try {
-            const resultCloudinary = await cloudinary.uploader.upload(photoPath);
-
-            fs.unlinkSync(photoPath);
-
-            const userData = await User.findOne({token: req.body.token})
-                if(userData) {
-                const newDocument = new Document({
-                    user: userData._id,
-                    fileName: req.body.fileName,
-                    fileType: req.body.fileType,
-                    creationDate: new Date(),
-                    modificationDate: new Date(),
-                    documentContent: req.body.documentContent,
-                    documentImg: resultCloudinary.secure_url,
-                })
-                const newDoc = await newDocument.save()
-                    res.json({result: true, newDoc})
-                } else {
-                    res.json({result: false, message: "user token not found"})
-                }
-        } catch (error) {
-            res.json({ result: false, error: error.message });
+    try {
+        if (!checkbody(req.body, ['token','fileName','fileType', 'documentContent'])) {
+            throw new Error('Missing or empty fields');
         }
-    } else {
-        res.json({ result: false, error: "Failed to move tmp file" });
+
+        const photoPath = `./tmp/${uniqid()}.png`;
+        const resultMove = await writeFileAsync(photoPath, req.file.buffer);
+
+        if (!resultMove) {
+            try {
+                const resultCloudinary = await cloudinary.uploader.upload(photoPath);
+
+                await unlinkAsync(photoPath);
+
+                const userData = await User.findOne({token: req.body.token});
+                
+                if (userData) {
+                    const newDocument = new Document({
+                        user: userData._id,
+                        fileName: req.body.fileName,
+                        fileType: req.body.fileType,
+                        creationDate: new Date(),
+                        modificationDate: new Date(),
+                        documentContent: req.body.documentContent,
+                        documentImg: resultCloudinary.secure_url,
+                    })
+                    const newDoc = await newDocument.save()
+                        res.json({result: true, newDoc})
+                } else {
+                    throw new Error('User token not found');
+                } 
+            } catch (error) {
+                throw new Error('Problem with Cloudinary upload or database operation');
+            }
+        } else {
+            throw new Error('Failed to move tmp file');
+        }
+    } catch (error) {
+        res.json({ result: false, error: error.message });
     }
-})
+});
+
+// router.post('/', async (req, res) => {
+
+//     const photoPath = `./tmp/${uniqid()}.jpg`;
+//     const resultMove = await req.files.photoFromFront.mv(photoPath);
+    
+//     if (!checkbody(req.body, ['token','fileName','fileType', 'documentContent'])) {
+//         res.json({ result: false, error: 'Missing or empty fields' });
+//         return;
+//       }
+    
+//     if(!resultMove) {
+//         try {
+//             const resultCloudinary = await cloudinary.uploader.upload(photoPath);
+
+//             fs.unlinkSync(photoPath);
+
+//             const userData = await User.findOne({token: req.body.token})
+//                 if(userData) {
+//                 const newDocument = new Document({
+//                     user: userData._id,
+//                     fileName: req.body.fileName,
+//                     fileType: req.body.fileType,
+//                     creationDate: new Date(),
+//                     modificationDate: new Date(),
+//                     documentContent: req.body.documentContent,
+//                     documentImg: resultCloudinary.secure_url,
+//                 })
+//                 const newDoc = await newDocument.save()
+//                     res.json({result: true, newDoc})
+//                 } else {
+//                     res.json({result: false, message: "user token not found"})
+//                 }
+//         } catch (error) {
+//             res.json({ result: false, error: error.message });
+//         }
+//     } else {
+//         res.json({ result: false, error: "Failed to move tmp file" });
+//     }
+// })
 
 //route pour update un pattern (il reste toujours dans son statut de "document"), pour le moment sans token car je nen vois pas l'utilité vu que chaque _id de document est unique sur Mongo...
 router.put("/", async (req, res) => {
