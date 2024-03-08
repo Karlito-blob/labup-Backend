@@ -16,7 +16,7 @@ const util = require('util');
 const writeFileAsync = util.promisify(fs.writeFile);
 const unlinkAsync = util.promisify(fs.unlink);
 
-//route pour récuperer tous les documents d'un user en fonction de son token (IL FAUDRA PEUT ETRE SUPPRIMER LE POPULATE LIGNE 20 PAS SUR QUIL SOIT UTILE POUR UN SOUS-DOCUMENT)
+//route pour récuperer tous les documents d'un user en fonction de son token (IL FAUDRA PEUT ETRE SUPPRIMER LE POPULATE LIGNE 20 PAS SUR QUIL SOIT UTILE POUR UN SOUS-DOCUMENT) OK
 router.get('/:token', async (req, res) => {
     try {
         const userData = await User.findOne({ token: req.params.token });
@@ -38,7 +38,7 @@ router.get('/:token', async (req, res) => {
     }
 });
 
-//route pour récuperer un document précis d'un user en fonction de son token et de l'id du document
+//route pour récuperer un document précis d'un user en fonction de son token et de l'id du document OK
 router.get("/:token/:id", async (req, res) => {
     try {
         const userData = await User.findOne({ token: req.params.token });
@@ -60,7 +60,7 @@ router.get("/:token/:id", async (req, res) => {
     }
 });
 
-//route pour la création d'un nouveau document pour un user en fct du token
+//route pour la création d'un nouveau document pour un user en fct du token KARL TEST
 router.post('/', async (req, res) => {
     try {
         if (!checkbody(req.body, ['token','fileName','fileType', 'documentContent'])) {
@@ -108,37 +108,45 @@ router.post('/', async (req, res) => {
 });
 
 //route pour update un pattern (il reste toujours dans son statut de "document"), pour le moment sans token car je nen vois pas l'utilité vu que chaque _id de document est unique sur Mongo...
+//==================A TESTER EN LIVE//==================
 router.put("/", async (req, res) => {
-    const photoPath = `./tmp/${uniqid()}.jpg`;
-    const resultMove = await req.files.photoFromFront.mv(photoPath);
-    
-    if (!checkbody(req.body, ['fileName', 'fileType', 'documentContent', 'id'])) {
-        res.json({ result: false, error: 'Missing or empty fields' });
-        return;
-      }
-    
-    if(!resultMove) {
-        try {
-            const resultCloudinary = await cloudinary.uploader.upload(photoPath);
+    try {
+        if (!checkbody(req.body, ['fileName', 'fileType', 'documentContent', 'id'])) {
+            throw new Error('Missing or empty fields');
+          }
 
-            fs.unlinkSync(photoPath);
-    
-            const modifDoc = await Document.findOneAndUpdate({_id: req.body.id},
-                {fileName: req.body.fileName,
-                fileType: req.body.fileType,
-                modificationDate: new Date(),
-                documentContent: req.body.documentContent,
-                documentImg: resultCloudinary.secure_url})
-            res.json({result: true, modifDoc})
-        } catch (error) {
-            res.json({ result: false, error: error.message });
+        const photoPath = `./tmp/${uniqid()}.png`;
+        const resultMove = await writeFileAsync(photoPath, req.file.buffer);
+
+        if (!resultMove) {
+            try {
+                const resultCloudinary = await cloudinary.uploader.upload(photoPath);
+
+                await unlinkAsync(photoPath);
+
+                const modifDoc = await Document.findOneAndUpdate({_id: req.body.id}, 
+                    {fileName: req.body.fileName,
+                        fileType: req.body.fileType,
+                        modificationDate: new Date(),
+                        documentContent: req.body.documentContent,
+                        documentImg: resultCloudinary.secure_url})
+
+                res.json({result: true, modifDoc})
+            } catch (error) {
+                console.error('An error occurred:', error);
+                return res.status(500).json({ result: false, error: 'Problem with Cloudinary upload or database operation'});
+            }
+        } else {
+            await unlinkAsync(photoPath);
+            throw new Error("Failed to move tmp file")
         }
-    } else {
-        res.json({ result: false, error: "Failed to move tmp file" });
+    } catch (error) {
+        console.error('An error occurred:', error);
+        return res.status(500).json({ result: false, error: error.message});
     }
 })
 
-//route delete UN document de la collection documents
+//route delete UN document de la collection documents OK
 router.delete("/:id", async (req, res) => {
     try {
         const data = await Document.findOne({ _id: req.params.id });

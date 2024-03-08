@@ -126,7 +126,8 @@ router.post('/', async (req, res) => {
     }
 });
 
-//route pour update un pattern (il reste toujours dans son statut de "modifiedPattern"), pour le moment sans token car je nen vois pas l'utilité vu que chaque _id de pattern modif est unique sur Mongo... A TESTER EN LIVE
+//route pour update un pattern (il reste toujours dans son statut de "modifiedPattern"), pour le moment sans token car je nen vois pas l'utilité vu que chaque _id de pattern modif est unique sur Mongo... 
+//==================A TESTER EN LIVE//==================
 router.put("/", async (req, res) => {
     try {
         if (!checkbody(req.body, ['paramsModif', "fileName", "id"])) {
@@ -163,7 +164,7 @@ router.put("/", async (req, res) => {
     }
 })
 
-//route delete UN modifiedpattern de la collection modifiedPatterns
+//route delete UN modifiedpattern de la collection modifiedPatterns OK
 router.delete("/:id", async (req, res) => {
     try {
         const data = await ModifiedPattern.findOne({ _id: req.params.id });
