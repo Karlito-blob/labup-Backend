@@ -11,6 +11,7 @@ const documentContentSchema = mongoose.Schema({
 })
 
 const documentSchema = mongoose.Schema({
+    cloudinary_public_id: String,
     user: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
     fileName: String,
     fileType: String,
