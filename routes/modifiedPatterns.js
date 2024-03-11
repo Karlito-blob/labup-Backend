@@ -95,13 +95,14 @@ router.post('/', async (req, res) => {
 
                 const userData = await User.findOne({token: req.body.token});
                 
+                const paramsModif = JSON.parse(req.body.paramsModif);
                 if (userData) {
                     const newModifiedPattern = new ModifiedPattern({
                         cloudinary_public_id: resultCloudinary.public_id,
                         user: userData._id,
                         initialPattern: req.body.initialPattern,
                         patternName: req.body.patternName,
-                        paramsModif: req.body.paramsModif,
+                        paramsModif: paramsModif,
                         fileName: req.body.fileName,
                         creationDate: new Date(),
                         modificationDate: new Date(),

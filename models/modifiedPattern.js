@@ -19,6 +19,7 @@ const modifiedPatternSchema = mongoose.Schema({
     creationDate: Date,
     modificationDate: Date,
     patternImg: String,
+    
 });
 
 const ModifiedPattern = mongoose.model('modifiedPatterns', modifiedPatternSchema);
