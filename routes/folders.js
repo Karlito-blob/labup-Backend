@@ -25,7 +25,7 @@ router.get('/:token', (req, res) => {
     })
 });
 
-//route pour récuperer un document précis d'un user en fonction de son token et de l'id du document
+//route pour récuperer un folder précis d'un user en fonction de son token et de l'id du folder
 router.get("/:token/:id", (req, res) => {
     User.findOne({token: req.params.token}).then(userData => {
         if(!userData) {
@@ -150,7 +150,7 @@ router.put("/document", async (req, res) => {
     }
 });
 
-//route pour delete un Folder (ne détruit pas les documents/patternModifs originaux, juste leurs relation clé étrangère avec le Folder détruit)
+//route pour delete un Folder (ne détruit pas les documents/patternModifs originaux, exports, juste leurs relation clé étrangère avec le Folder détruit)
 router.delete("/:idFolder", async (req, res) => {
     try {
         const result = await Folder.findOneAndDelete({_id : req.params.idFolder})

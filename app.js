@@ -12,6 +12,7 @@ var usersRouter = require('./routes/users');
 var initialPatternsRouter = require('./routes/initialPatterns');
 var modifiedPatternsRouter = require('./routes/modifiedPatterns');
 var documentsRouter = require("./routes/documents");
+var exportsRouter = require("./routes/exports")
 var foldersRouter = require("./routes/folders");
 var fontsRouter = require("./routes/fonts");
 
@@ -40,6 +41,7 @@ app.use('/users', usersRouter);
 app.use('/initialPatterns', initialPatternsRouter);
 app.use('/modifiedPatterns', upload.single('photoFromFront'), modifiedPatternsRouter);
 app.use('/documents', upload.single('photoFromFront'), documentsRouter);
+app.use("/exports", upload.single('photoFromFront'), exportsRouter);
 app.use("/folders", foldersRouter);
 app.use('/fonts', fontsRouter);
 

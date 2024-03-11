@@ -60,7 +60,7 @@ router.get("/:token/:id", async (req, res) => {
     }
 });
 
-//route pour la création d'un nouveau document pour un user en fct du token KARL TEST
+//route pour la création d'un nouveau document pour un user en fct du token OK
 router.post('/', async (req, res) => {
     try {
         if (!checkbody(req.body, ['token','fileName','fileType', 'documentContent'])) {
@@ -82,6 +82,7 @@ router.post('/', async (req, res) => {
                     const documentContent = JSON.parse(req.body.documentContent);
 
                     const newDocument = new Document({
+                        cloudinary_public_id: resultCloudinary.public_id,
                         user: userData._id,
                         fileName: req.body.fileName,
                         fileType: req.body.fileType,
@@ -111,6 +112,7 @@ router.post('/', async (req, res) => {
 
 //route pour update un pattern (il reste toujours dans son statut de "document"), pour le moment sans token car je nen vois pas l'utilité vu que chaque _id de document est unique sur Mongo...
 //==================A TESTER EN LIVE//==================
+//==================PAS CERTAIN DE L'UTILITE VU QUE VOUS VOULEZ GARDER TOUJOURS LES ANCIENNES MODIFS (TOUT PEUT ETRE FAIT UNIQUEMENT A LA REQUETE POST AU DESSUS//==================
 router.put("/", async (req, res) => {
     try {
         if (!checkbody(req.body, ['fileName', 'fileType', 'documentContent', 'id'])) {
@@ -151,9 +153,12 @@ router.put("/", async (req, res) => {
 //route delete UN document de la collection documents OK
 router.delete("/:id", async (req, res) => {
     try {
+
         const data = await Document.findOne({ _id: req.params.id });
 
-        if (data) {
+        resultCloudinary = await cloudinary.uploader.destroy(data.cloudinary_public_id)
+
+        if (resultCloudinary.result === "ok") {
             await Document.deleteOne({ _id: data._id });
             res.json({ result: true, message: "Document deleted" });
         } else {

@@ -7,6 +7,7 @@ const folderSchema = mongoose.Schema({
     modificationDate: Date,
     patterns: [{ type: mongoose.Schema.Types.ObjectId, ref: "modifiedPatterns" }],
     documents: [{ type: mongoose.Schema.Types.ObjectId, ref: "documents" }],
+    exports: [{ type: mongoose.Schema.Types.ObjectId, ref: "exports" }],
     public: Boolean,
 });
 
