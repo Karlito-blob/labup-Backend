@@ -90,6 +90,7 @@ router.post('/', async (req, res) => {
                         modificationDate: new Date(),
                         documentContent: documentContent,
                         documentImg: resultCloudinary.secure_url,
+                        public: false
                     })
                     const newDoc = await newDocument.save()
                         res.json({result: true, newDoc})

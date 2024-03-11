@@ -89,6 +89,7 @@ router.post('/', async (req, res) => {
                         creationDate: new Date(),
                         modificationDate: new Date(),
                         exportImg: resultCloudinary.secure_url,
+                        public: false
                     })
                     const newDoc = await newExport.save()
                         res.json({result: true, newDoc})

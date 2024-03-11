@@ -19,6 +19,7 @@ const documentSchema = mongoose.Schema({
     modificationDate: Date,
     documentContent: [documentContentSchema],
     documentImg: String,
+    public: Boolean
 });
 
 const Document = mongoose.model('documents', documentSchema);

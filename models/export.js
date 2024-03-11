@@ -8,6 +8,7 @@ const exportSchema = mongoose.Schema({
     creationDate: Date,
     modificationDate: Date,
     exportImg: String,
+    public: Boolean
 });
 
 const Export = mongoose.model('exports', exportSchema);

@@ -107,6 +107,7 @@ router.post('/', async (req, res) => {
                         creationDate: new Date(),
                         modificationDate: new Date(),
                         patternImg: resultCloudinary.secure_url,
+                        public: false
                     });
 
                     const newDoc = await newModifiedPattern.save();

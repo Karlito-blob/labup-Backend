@@ -44,7 +44,7 @@ router.get("/:token/:id", (req, res) => {
 
 //route pour la création d'un nouveau folder pour un user en fct du token
 router.post('/', (req, res) => {
-    if (!checkbody(req.body, ['token', 'projectName', "public"])) {
+    if (!checkbody(req.body, ['token', 'projectName'])) {
         res.json({ result: false, error: 'Missing or empty fields' });
         return;
     }
@@ -57,7 +57,7 @@ router.post('/', (req, res) => {
                 modificationDate: new Date(),
                 patterns: [],
                 documents: [],
-                public: req.body.public,
+                public: false,
             })
             newFolder.save().then(newDoc => {
                 res.json({result: true, newDoc})
