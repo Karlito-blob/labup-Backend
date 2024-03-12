@@ -15,6 +15,8 @@ var documentsRouter = require("./routes/documents");
 var exportsRouter = require("./routes/exports")
 var foldersRouter = require("./routes/folders");
 var fontsRouter = require("./routes/fonts");
+var feedRouter = require("./routes/feed");
+
 
 var app = express();
 
@@ -44,5 +46,7 @@ app.use('/documents', upload.single('photoFromFront'), documentsRouter);
 app.use("/exports", upload.single('photoFromFront'), exportsRouter);
 app.use("/folders", foldersRouter);
 app.use('/fonts', fontsRouter);
+app.use('/feed', feedRouter);
+
 
 module.exports = app;
