@@ -10,6 +10,13 @@ const documentContentSchema = mongoose.Schema({
     fontFamily: String,
 })
 
+const canvaParamsSchema = mongoose.Schema({
+    width: Number,
+    heigth: Number,
+    justifyContent: String,
+    padding: Number,
+})
+
 const documentSchema = mongoose.Schema({
     cloudinary_public_id: String,
     user: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
@@ -18,6 +25,7 @@ const documentSchema = mongoose.Schema({
     creationDate: Date,
     modificationDate: Date,
     documentContent: [documentContentSchema],
+    canvaParams: canvaParamsSchema,
     documentImg: String,
     public: Boolean
 });
