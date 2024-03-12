@@ -1,13 +1,20 @@
 const mongoose = require('mongoose');
 
 const documentContentSchema = mongoose.Schema({
-    zoneName: String,
-    contenu: String,
-    size: Number,
-    font: String,
-    color: String,
-    posX: Number,
-    posY: Number
+    valeur: String,
+    enGras: Boolean,
+    enItalique: Boolean,
+    tailleTexte: String,
+    alignementTexte: String,
+    textTransform: String,
+    fontFamily: String,
+})
+
+const canvaParamsSchema = mongoose.Schema({
+    width: Number,
+    height: Number,
+    justifyContent: String,
+    padding: Number,
 })
 
 const documentSchema = mongoose.Schema({
@@ -18,6 +25,7 @@ const documentSchema = mongoose.Schema({
     creationDate: Date,
     modificationDate: Date,
     documentContent: [documentContentSchema],
+    canvaParams: canvaParamsSchema,
     documentImg: String,
     public: Boolean
 });

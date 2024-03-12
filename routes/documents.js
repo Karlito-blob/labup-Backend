@@ -63,7 +63,7 @@ router.get("/:token/:id", async (req, res) => {
 //route pour la création d'un nouveau document pour un user en fct du token OK
 router.post('/', async (req, res) => {
     try {
-        if (!checkbody(req.body, ['token','fileName','fileType', 'documentContent'])) {
+        if (!checkbody(req.body, ['token','fileName','fileType', 'documentContent', 'canvaParams'])) {
             throw new Error('Missing or empty fields');
         }
 
@@ -80,6 +80,7 @@ router.post('/', async (req, res) => {
                 
                 if (userData) {
                     const documentContent = JSON.parse(req.body.documentContent);
+                    const canvaParams = JSON.parse(req.body.canvaParams);
 
                     const newDocument = new Document({
                         cloudinary_public_id: resultCloudinary.public_id,
@@ -89,6 +90,7 @@ router.post('/', async (req, res) => {
                         creationDate: new Date(),
                         modificationDate: new Date(),
                         documentContent: documentContent,
+                        canvaParams: canvaParams,
                         documentImg: resultCloudinary.secure_url,
                         public: false
                     })

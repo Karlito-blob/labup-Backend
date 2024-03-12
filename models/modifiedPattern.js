@@ -1,14 +1,5 @@
 const mongoose = require('mongoose');
 
-/*
-paramName: String,
-type: String,
-couleur: String,
-valeurInitiale: Number,
-valeurMin: Number,
-valeurMax: Number,
-*/
-
 const modifiedPatternSchema = mongoose.Schema({
     cloudinary_public_id: String,
     user: { type: mongoose.Schema.Types.ObjectId, ref: "users" }, 

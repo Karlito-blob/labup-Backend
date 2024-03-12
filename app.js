@@ -16,7 +16,7 @@ var exportsRouter = require("./routes/exports")
 var foldersRouter = require("./routes/folders");
 var fontsRouter = require("./routes/fonts");
 var feedRouter = require("./routes/feed");
-
+var dashboardRouter = require("./routes/dashboard")
 
 var app = express();
 
@@ -48,5 +48,6 @@ app.use("/folders", foldersRouter);
 app.use('/fonts', fontsRouter);
 app.use('/feed', feedRouter);
 
+app.use('/dashboard', dashboardRouter);
 
 module.exports = app;

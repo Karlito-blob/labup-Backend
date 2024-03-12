@@ -57,6 +57,7 @@ router.post('/', (req, res) => {
                 modificationDate: new Date(),
                 patterns: [],
                 documents: [],
+                exports: [],
                 public: false,
             })
             newFolder.save().then(newDoc => {
