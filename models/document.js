@@ -1,13 +1,13 @@
 const mongoose = require('mongoose');
 
 const documentContentSchema = mongoose.Schema({
-    zoneName: String,
-    contenu: String,
-    size: Number,
-    font: String,
-    color: String,
-    posX: Number,
-    posY: Number
+    valeur: String,
+    enGras: Boolean,
+    enItalique: Boolean,
+    tailleTexte: String,
+    alignementTexte: String,
+    textTransform: String,
+    fontFamily: String,
 })
 
 const documentSchema = mongoose.Schema({
