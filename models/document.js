@@ -12,7 +12,7 @@ const documentContentSchema = mongoose.Schema({
 
 const canvaParamsSchema = mongoose.Schema({
     width: Number,
-    heigth: Number,
+    height: Number,
     justifyContent: String,
     padding: Number,
 })
