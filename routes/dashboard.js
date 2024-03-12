@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 require('../models/connection');
-const User = require("../models/users")
+const User = require("../models/users");
 const ModifiedPattern = require("../models/modifiedPattern");
 const Document = require("../models/document");
 const Export = require("../models/export");
@@ -17,21 +17,26 @@ router.get("/:token", async (req, res) => {
 
         const aggregatedData = await ModifiedPattern.aggregate([
             {
-                $match: { user: userData._id } // Filtrer les documents de ModifiedPattern pour l'utilisateur spécifié
+                $match: { user: userData._id }
+            },
+            {
+                $addFields: { image: "$patternImg" },
             },
             {
                 $unionWith: {
-                    coll: "documents", // Nom de la deuxième collection
+                    coll: "documents",
                     pipeline: [
-                        { $match: { user: userData._id } } // Filtrer les documents de Document pour l'utilisateur spécifié
+                        { $match: { user: userData._id } },
+                        { $addFields: { image: "$documentImg" } },
                     ]
                 }
             },
             {
                 $unionWith: {
-                    coll: "exports", // Nom de la troisième collection
+                    coll: "exports",
                     pipeline: [
-                        { $match: { user: userData._id } } // Filtrer les documents de Export pour l'utilisateur spécifié
+                        { $match: { user: userData._id } },
+                        { $addFields: { image: "$exportImg" }},
                     ]
                 }
             }
