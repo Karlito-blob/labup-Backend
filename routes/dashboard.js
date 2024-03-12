@@ -15,11 +15,16 @@ router.get("/:token", async (req, res) => {
             return;
         }
 
-        const dataFromModifiedPattern = await ModifiedPattern.find()
-        const dataFromModifiedPattern = await ModifiedPattern.find()
-        
-    } catch (error) {
+        const dataFromModifiedPattern = await ModifiedPattern.find().toArray()
+        const dataFromDocument = await Document.find().toArray()
+        const dataFromExport = await Export.find().toArray()
 
+        const aggregatedData = dataFromModifiedPattern.concat(dataFromDocument, dataFromExport);
+        
+        res.json({result: true, dashboardData: aggregatedData})
+    } catch (error) {
+        console.error(err);
+        res.status(500).json({ message: "Erreur lors de la récupération des données." });
     }
 })
 
