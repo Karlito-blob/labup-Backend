@@ -85,7 +85,7 @@ router.post('/', async (req, res) => {
                         cloudinary_public_id: resultCloudinary.public_id,
                         user: userData._id,
                         fileName: req.body.exportName,
-                        fileType: req.body.exportType,
+                        fileType: "Export",
                         creationDate: new Date(),
                         modificationDate: new Date(),
                         exportImg: resultCloudinary.secure_url,

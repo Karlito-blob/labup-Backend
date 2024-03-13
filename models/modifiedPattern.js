@@ -7,6 +7,7 @@ const modifiedPatternSchema = mongoose.Schema({
     patternName: String,
     paramsModif: [{}],
     fileName: String,
+    fileType: String,
     creationDate: Date,
     modificationDate: Date,
     patternImg: String,

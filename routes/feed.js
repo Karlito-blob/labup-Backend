@@ -31,7 +31,8 @@ router.get('/', async (req, res) => {
                 },
                 creationDate: item.creationDate || item.creationDate || item.creationDate,
                 modificationDate: item.modificationDate || item.modificationDate || item.modificationDate,
-                type
+                type,
+                like: item.like //ajout a ta route pour recuperer le nombre de like
             };
 
             if (includePatternName) {
@@ -118,11 +119,12 @@ router.put('/updateLike/:type/:id/:token', async (req, res) => {
         if (!file) return res.status(404).json({ result: false, message: 'Document non trouvé.' });
         const userLikedIndex = file.like.indexOf(userData._id)
         if (userLikedIndex === -1) {
-            await file.updateOne({ $push: { like: userData._id } });
+        const result = await file.updateOne({ $push: { like: userData._id } }, {new:true});
+        res.status(200).json({ result: true, message: 'Like mis à jour avec succès.', result: result});
         } else {
-            await file.updateOne({ $pull: { like: userData._id } });
+        const result = await file.updateOne({ $pull: { like: userData._id } }, {new:true});
+        res.status(200).json({ result: true, message: 'Like mis à jour avec succès.', result: result});
         }
-        res.status(200).json({ result: true, message: 'Like mis à jour avec succès.' });
     } catch (error) {
         console.error(error);
         res.status(500).json({ result: false, message: 'Erreur serveur.' });
