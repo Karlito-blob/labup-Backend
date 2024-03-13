@@ -1,13 +1,25 @@
 const mongoose = require('mongoose');
 
+// const documentContentSchema = mongoose.Schema({
+//     valeur: String,
+//     enGras: Boolean,
+//     enItalique: Boolean,
+//     tailleTexte: String,
+//     alignementTexte: String,
+//     textTransform: String,
+//     fontFamily: String,
+// })
+
 const documentContentSchema = mongoose.Schema({
-    valeur: String,
-    enGras: Boolean,
-    enItalique: Boolean,
-    tailleTexte: String,
-    alignementTexte: String,
+    inputValue: String,
+    isBold: Boolean,
+    isItalic: Boolean,
+    isUnderline: Boolean,
     textTransform: String,
+    textAlign: String,
     fontFamily: String,
+    fontSize: String,
+    color: String,
 })
 
 const canvaParamsSchema = mongoose.Schema({
