@@ -55,16 +55,17 @@ router.get('/:token', async (req, res) => {
 });
 
 //route pour récuperer un modifiedPattern précis d'un user en fonction de son token et de l'id du modifiedPattern OK
-router.get("/:token/:id", async (req, res) => {
+router.get("/:id", async (req, res) => {
     try {
-        const userData = await User.findOne({ token: req.params.token });
+        // const userData = await User.findOne({ token: req.params.token });
         
-        if (!userData) {
-            res.json({ result: false, message: "User token not found" });
-            return;
-        }
+        // if (!userData) {
+        //     res.json({ result: false, message: "User token not found" });
+        //     return;
+        // }
 
-        const data = await ModifiedPattern.findOne({ user: userData._id, _id: req.params.id }).populate('initialPattern');
+        // const data = await ModifiedPattern.findOne({ user: userData._id, _id: req.params.id }).populate('initialPattern');
+        const data = await ModifiedPattern.findOne({ _id: req.params.id }).populate('initialPattern');
         
         if (!data) {
             res.json({ result: false, message: "Can't find this pattern" });
@@ -75,7 +76,6 @@ router.get("/:token/:id", async (req, res) => {
         res.status(500).json({ result: false, error: error.message });
     }
 });
-
 
 //route pour la création d'un nouveau pattern modifié pour un user en fct du token OK
 router.post('/', async (req, res) => {

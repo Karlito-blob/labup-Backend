@@ -117,18 +117,23 @@ router.put('/updateLike/:type/:id/:token', async (req, res) => {
         }
         const file = await model.findById(id)
         if (!file) return res.status(404).json({ result: false, message: 'Document non trouvé.' });
+
         const userLikedIndex = file.like.indexOf(userData._id)
+        let updateQuery;
+
         if (userLikedIndex === -1) {
-        const result = await file.updateOne({ $push: { like: userData._id } }, {new:true});
-        res.status(200).json({ result: true, message: 'Like mis à jour avec succès.', result: result});
+            updateQuery = { $push: { like: userData._id } };
         } else {
-        const result = await file.updateOne({ $pull: { like: userData._id } }, {new:true});
-        res.status(200).json({ result: true, message: 'Like mis à jour avec succès.', result: result});
+            updateQuery = { $pull: { like: userData._id } };
         }
+
+        const updatedFile = await model.findByIdAndUpdate(id, updateQuery, { new: true });
+
+        res.status(200).json({ result: true, message: 'Like mis à jour avec succès.', updatedFile });
     } catch (error) {
         console.error(error);
         res.status(500).json({ result: false, message: 'Erreur serveur.' });
     }
-})
+});
 
 module.exports = router;
