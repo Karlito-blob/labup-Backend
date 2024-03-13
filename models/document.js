@@ -27,7 +27,8 @@ const documentSchema = mongoose.Schema({
     documentContent: [documentContentSchema],
     canvaParams: canvaParamsSchema,
     documentImg: String,
-    public: Boolean
+    public: Boolean,
+    like: [{type: mongoose.Schema.Types.ObjectId, ref: "users"}]
 });
 
 const Document = mongoose.model('documents', documentSchema);

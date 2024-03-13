@@ -95,10 +95,38 @@ router.put('/updatePublic/:type/:id/:public', async (req, res) => {
     }
 });
 
-
-
-
-
-
+router.put('/updateLike/:type/:id/:token', async (req, res) => {
+    const { type, id, token } = req.params;
+    let model;
+    try {
+        const userData = await User.findOne({token: token})
+        if (!userData) return res.status(400).json({ result: false, message: 'Token non valide.' });
+        switch (type) {
+            case 'document':
+                model = Document;
+                break;
+            case 'modifiedPattern':
+                model = ModifiedPattern;
+                break;
+            case 'export':
+                model = Export;
+                break;
+            default:
+                return res.status(400).json({ result: false, message: 'Type non valide.' });
+        }
+        const file = await model.findById(id)
+        if (!file) return res.status(404).json({ result: false, message: 'Document non trouvé.' });
+        const userLikedIndex = file.like.indexOf(userData._id)
+        if (userLikedIndex === -1) {
+            await file.updateOne({ $push: { like: userData._id } });
+        } else {
+            await file.updateOne({ $pull: { like: userData._id } });
+        }
+        res.status(200).json({ result: true, message: 'Like mis à jour avec succès.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ result: false, message: 'Erreur serveur.' });
+    }
+})
 
 module.exports = router;

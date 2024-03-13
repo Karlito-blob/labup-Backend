@@ -8,7 +8,8 @@ const exportSchema = mongoose.Schema({
     creationDate: Date,
     modificationDate: Date,
     exportImg: String,
-    public: Boolean
+    public: Boolean,
+    like: [{type: mongoose.Schema.Types.ObjectId, ref: "users"}]
 });
 
 const Export = mongoose.model('exports', exportSchema);
