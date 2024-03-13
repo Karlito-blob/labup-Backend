@@ -64,7 +64,7 @@ router.get("/:token/:id", async (req, res) => {
 //route pour la création d'un nouveau export pour un user en fct du token OK
 router.post('/', async (req, res) => {
     try {
-        if (!checkbody(req.body, ['token','exportName','exportType'])) {
+        if (!checkbody(req.body, ['token','exportName','format'])) {
             throw new Error('Missing or empty fields');
         }
 
@@ -86,6 +86,7 @@ router.post('/', async (req, res) => {
                         user: userData._id,
                         fileName: req.body.exportName,
                         fileType: "Export",
+                        format: req.body.format,
                         creationDate: new Date(),
                         modificationDate: new Date(),
                         exportImg: resultCloudinary.secure_url,

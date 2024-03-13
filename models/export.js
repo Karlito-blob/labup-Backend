@@ -5,6 +5,7 @@ const exportSchema = mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
     fileName: String,
     fileType: String,
+    format: String,
     creationDate: Date,
     modificationDate: Date,
     exportImg: String,
