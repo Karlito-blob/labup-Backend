@@ -33,7 +33,7 @@ router.get('/', async (req, res) => {
 });
 
 //route pour récuperer tous les modifiedPatterns d'un user en fonction de son token OK
-router.get('/:token', async (req, res) => {
+router.get('/all/:token', async (req, res) => {
     try {
         const userData = await User.findOne({ token: req.params.token });
         
@@ -55,7 +55,7 @@ router.get('/:token', async (req, res) => {
 });
 
 //route pour récuperer un modifiedPattern précis d'un user en fonction de son token et de l'id du modifiedPattern OK
-router.get("/:id", async (req, res) => {
+router.get("/one/:id", async (req, res) => {
     try {
         // const userData = await User.findOne({ token: req.params.token });
         
