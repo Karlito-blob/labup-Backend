@@ -72,7 +72,7 @@ router.post('/', async (req, res) => {
 
         if (!resultMove) {
             try {
-                const resultCloudinary = await cloudinary.uploader.upload(photoPath);
+                const resultCloudinary = await cloudinary.uploader.upload(photoPath, {folder: 'documents'});
 
                 await unlinkAsync(photoPath);
 
