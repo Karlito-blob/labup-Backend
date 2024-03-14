@@ -60,7 +60,7 @@ router.get("/:token/:id", async (req, res) => {
     }
 });
 
-//router pour recuperer un document via son id
+//router pour recuperer un document via son id 
 router.get("/one/:id", async (req, res) => {
     try {
         const data = await Document.findOne({ _id: req.params.id })
