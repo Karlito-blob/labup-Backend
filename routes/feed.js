@@ -136,4 +136,21 @@ router.put('/updateLike/:type/:id/:token', async (req, res) => {
     }
 });
 
+//route test pour download depuis cloudinary
+router.post('/download', async (req, res) => {
+    try {
+        const { imageUrl } = req.body;
+
+        // Télécharger le fichier Cloudinary
+        const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+
+        // Renvoyer le contenu du fichier dans la réponse
+        res.set('Content-Type', 'image/jpeg');
+        res.send(response.data);
+    } catch (error) {
+        console.error("Erreur lors du téléchargement de l'image :", error);
+        res.status(500).send("Erreur lors du téléchargement de l'image");
+    }
+});
+
 module.exports = router;

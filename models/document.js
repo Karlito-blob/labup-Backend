@@ -27,6 +27,7 @@ const canvaParamsSchema = mongoose.Schema({
     height: String,
     justifyContent: String,
     padding: Number,
+    backgroudImage: String
 })
 
 const documentSchema = mongoose.Schema({

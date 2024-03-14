@@ -60,6 +60,21 @@ router.get("/:token/:id", async (req, res) => {
     }
 });
 
+//router pour recuperer un document via son id
+router.get("/one/:id", async (req, res) => {
+    try {
+        const data = await Document.findOne({ _id: req.params.id })
+        
+        if (!data) {
+            res.json({ result: false, message: "Can't find this document" });
+        } else {
+            res.json({ result: true, Document: data });
+        }
+    } catch (error) {
+        res.status(500).json({ result: false, error: error.message });
+    }
+});
+
 //route pour la création d'un nouveau document pour un user en fct du token OK
 router.post('/', async (req, res) => {
     try {
