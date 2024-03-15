@@ -27,7 +27,6 @@ const canvaParamsSchema = mongoose.Schema({
     height: String,
     justifyContent: String,
     padding: Number,
-    backgroudImage: String
 })
 
 const documentSchema = mongoose.Schema({
@@ -39,6 +38,7 @@ const documentSchema = mongoose.Schema({
     modificationDate: Date,
     documentContent: [documentContentSchema],
     canvaParams: canvaParamsSchema,
+    backgroudImage: String,
     documentImg: String,
     public: Boolean,
     like: [{type: mongoose.Schema.Types.ObjectId, ref: "users"}]

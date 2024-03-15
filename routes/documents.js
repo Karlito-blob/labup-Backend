@@ -104,6 +104,7 @@ router.post('/', async (req, res) => {
                         fileType: "Document",
                         creationDate: new Date(),
                         modificationDate: new Date(),
+                        backgroudImage: req.body.backgroudImage,
                         documentContent: documentContent,
                         canvaParams: canvaParams,
                         documentImg: resultCloudinary.secure_url,
