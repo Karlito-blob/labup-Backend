@@ -7,6 +7,9 @@ const User = require('../models/users');
 const ModifiedPattern = require("../models/modifiedPattern");
 const Document = require("../models/document");
 const Export = require("../models/export");
+const axios = require('axios');
+const blobStream = require('blob-stream');
+
 
 
 // Route get pour récupérer tous les fichiers en public et les exposer sur le feed
@@ -145,7 +148,7 @@ router.post('/download', async (req, res) => {
         const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
 
         // Renvoyer le contenu du fichier dans la réponse
-        res.set('Content-Type', 'image/jpeg');
+        res.set('Content-Type', 'image/png');
         res.send(response.data);
     } catch (error) {
         console.error("Erreur lors du téléchargement de l'image :", error);
